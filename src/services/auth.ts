@@ -22,7 +22,7 @@ export const authService = {
     return apiClient.get<User>('/auth/profile');
   },
 
-  async updateProfile(data: { name?: string; currency?: string; currentPassword?: string; newPassword?: string }): Promise<User> {
+  async updateProfile(data: { name?: string; currency?: string; currentPassword?: string; newPassword?: string; notifyRenewalReminders?: boolean; notifyEmailReminders?: boolean }): Promise<User> {
     return apiClient.put<User>('/auth/profile', data);
   },
 

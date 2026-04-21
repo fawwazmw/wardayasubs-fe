@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { subscriptionService } from '../services/subscriptions';
 import { categoryService } from '../services/categories';
-import { Calendar, DollarSign, Edit2, Trash2, Tag, Search, Filter, Power } from 'lucide-react';
+import { Calendar, DollarSign, Edit2, Trash2, Tag, Search, Filter, Power, CheckSquare, Square } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Category {
@@ -39,6 +39,8 @@ export default function SubscriptionList({ onEdit, refreshTrigger }: Subscriptio
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
   const [filterCategory, setFilterCategory] = useState('');
   const [page, setPage] = useState(1);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   const perPage = 9;
 
   useEffect(() => {
@@ -89,6 +91,43 @@ export default function SubscriptionList({ onEdit, refreshTrigger }: Subscriptio
       toast.success(updated.isActive ? 'Subscription activated' : 'Subscription deactivated');
     } catch (err: any) {
       toast.error(err.response?.data?.error || 'Failed to update subscription');
+    }
+  };
+
+  const handleToggleSelect = (id: string) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedIds(newSelected);
+  };
+
+  const handleSelectAll = () => {
+    if (selectedIds.size === paginated.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(paginated.map(s => s.id)));
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    
+    const count = selectedIds.size;
+    if (!confirm(`Are you sure you want to delete ${count} subscription${count > 1 ? 's' : ''}?`)) return;
+    
+    setBulkDeleting(true);
+    try {
+      const result = await subscriptionService.bulkDelete(Array.from(selectedIds));
+      setSubscriptions(subscriptions.filter(sub => !selectedIds.has(sub.id)));
+      setSelectedIds(new Set());
+      toast.success(result.message);
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Failed to delete subscriptions');
+    } finally {
+      setBulkDeleting(false);
     }
   };
 
@@ -156,6 +195,33 @@ export default function SubscriptionList({ onEdit, refreshTrigger }: Subscriptio
 
   return (
     <div className="space-y-4">
+      {/* Bulk Actions Bar */}
+      {selectedIds.size > 0 && (
+        <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <CheckSquare className="w-5 h-5 text-purple-400" />
+            <span className="text-white font-medium">
+              {selectedIds.size} subscription{selectedIds.size > 1 ? 's' : ''} selected
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setSelectedIds(new Set())}
+              className="px-4 py-2 text-sm bg-slate-700/50 text-gray-300 rounded-lg hover:bg-slate-700 transition-colors"
+            >
+              Clear Selection
+            </button>
+            <button
+              onClick={handleBulkDelete}
+              disabled={bulkDeleting}
+              className="px-4 py-2 text-sm bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/30 transition-colors border border-red-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {bulkDeleting ? 'Deleting...' : 'Delete Selected'}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Search & Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
@@ -194,10 +260,30 @@ export default function SubscriptionList({ onEdit, refreshTrigger }: Subscriptio
       </div>
 
       {/* Results count */}
-      {(search || filterStatus !== 'all' || filterCategory) && (
-        <p className="text-sm text-gray-500">
-          Showing {filtered.length} of {subscriptions.length} subscription{subscriptions.length !== 1 ? 's' : ''}
-        </p>
+      {(search || filterStatus !== 'all' || filterCategory || selectedIds.size > 0) && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-gray-500">
+            Showing {filtered.length} of {subscriptions.length} subscription{subscriptions.length !== 1 ? 's' : ''}
+          </p>
+          {filtered.length > 0 && (
+            <button
+              onClick={handleSelectAll}
+              className="flex items-center gap-2 text-sm text-purple-400 hover:text-purple-300 transition-colors"
+            >
+              {selectedIds.size === paginated.length ? (
+                <>
+                  <CheckSquare className="w-4 h-4" />
+                  Deselect All
+                </>
+              ) : (
+                <>
+                  <Square className="w-4 h-4" />
+                  Select All
+                </>
+              )}
+            </button>
+          )}
+        </div>
       )}
 
       {/* List */}
@@ -221,25 +307,37 @@ export default function SubscriptionList({ onEdit, refreshTrigger }: Subscriptio
               key={sub.id}
               className={`bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm rounded-xl border border-slate-700/50 p-6 hover:border-purple-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10 ${
                 !sub.isActive ? 'opacity-60' : ''
-              }`}
+              } ${selectedIds.has(sub.id) ? 'ring-2 ring-purple-500/50' : ''}`}
             >
               <div className="flex justify-between items-start mb-4">
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-white mb-2">{sub.name}</h3>
-                  {sub.category && (
-                    <div className="flex items-center gap-1.5 mb-3">
-                      <Tag className="w-3.5 h-3.5" style={{ color: sub.category.color }} />
-                      <span
-                        className="px-2 py-0.5 rounded-full text-xs font-medium"
-                        style={{
-                          backgroundColor: `${sub.category.color}20`,
-                          color: sub.category.color,
-                        }}
-                      >
-                        {sub.category.name}
-                      </span>
-                    </div>
-                  )}
+                <div className="flex items-start gap-3 flex-1">
+                  <button
+                    onClick={() => handleToggleSelect(sub.id)}
+                    className="mt-1 text-gray-400 hover:text-purple-400 transition-colors"
+                  >
+                    {selectedIds.has(sub.id) ? (
+                      <CheckSquare className="w-5 h-5 text-purple-400" />
+                    ) : (
+                      <Square className="w-5 h-5" />
+                    )}
+                  </button>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-white mb-2">{sub.name}</h3>
+                    {sub.category && (
+                      <div className="flex items-center gap-1.5 mb-3">
+                        <Tag className="w-3.5 h-3.5" style={{ color: sub.category.color }} />
+                        <span
+                          className="px-2 py-0.5 rounded-full text-xs font-medium"
+                          style={{
+                            backgroundColor: `${sub.category.color}20`,
+                            color: sub.category.color,
+                          }}
+                        >
+                          {sub.category.name}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <button
                   onClick={() => handleToggleActive(sub)}

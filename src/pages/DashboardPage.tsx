@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Plus, Download } from 'lucide-react';
+import { Plus, Download, Upload } from 'lucide-react';
 import Layout from '../components/Layout';
 import AnalyticsDashboard from '../components/AnalyticsDashboard';
 import UpcomingRenewals from '../components/UpcomingRenewals';
@@ -20,6 +20,7 @@ export default function DashboardPage() {
   const [editingSubscription, setEditingSubscription] = useState<any>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [visible, setVisible] = useState(true);
+  const [importing, setImporting] = useState(false);
   const pendingView = useRef<View | null>(null);
 
   useEffect(() => {
@@ -87,6 +88,62 @@ export default function DashboardPage() {
     }
   };
 
+  const handleImportCSV = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.csv';
+    input.onchange = async (e: any) => {
+      const file = e.target?.files?.[0];
+      if (!file) return;
+
+      setImporting(true);
+      try {
+        const text = await file.text();
+        const lines = text.split('\n').filter(l => l.trim());
+        if (lines.length < 2) {
+          alert('CSV file is empty or invalid');
+          return;
+        }
+
+        const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+        const subscriptions = [];
+
+        for (let i = 1; i < lines.length; i++) {
+          const values = lines[i].match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g)?.map(v => v.trim().replace(/^"|"$/g, '')) || [];
+          if (values.length < 5) continue;
+
+          const [name, amount, currency, billingCycle, nextBillingDate, status, categoryName, notes] = values;
+          
+          subscriptions.push({
+            name,
+            amount: parseFloat(amount),
+            currency: currency || 'USD',
+            billingCycle: billingCycle.toLowerCase(),
+            nextBillingDate,
+            isActive: status?.toLowerCase() !== 'inactive',
+            categoryName: categoryName || undefined,
+            notes: notes || undefined,
+          });
+        }
+
+        const result = await subscriptionService.importCSV(subscriptions);
+        
+        if (result.errors && result.errors.length > 0) {
+          alert(`Imported ${result.imported} subscription(s). ${result.failed} failed:\n${result.errors.slice(0, 5).join('\n')}`);
+        } else {
+          alert(result.message);
+        }
+        
+        setRefreshTrigger(prev => prev + 1);
+      } catch (err: any) {
+        alert(err.response?.data?.error || 'Failed to import CSV');
+      } finally {
+        setImporting(false);
+      }
+    };
+    input.click();
+  };
+
   return (
     <Layout>
       <div
@@ -132,6 +189,14 @@ export default function DashboardPage() {
                     <p className="text-gray-400">Manage all your recurring subscriptions</p>
                   </div>
                   <div className="flex gap-2">
+                    <Button
+                      onClick={handleImportCSV}
+                      disabled={importing}
+                      className="bg-slate-700/50 text-gray-300 hover:bg-slate-700 border border-slate-600"
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      {importing ? 'Importing...' : 'Import'}
+                    </Button>
                     <Button
                       onClick={handleExportCSV}
                       className="bg-slate-700/50 text-gray-300 hover:bg-slate-700 border border-slate-600"
