@@ -3,6 +3,7 @@ export interface User {
   email: string;
   name: string;
   currency: string;
+  isAdmin?: boolean;
   notifyRenewalReminders?: boolean;
   notifyEmailReminders?: boolean;
   createdAt: string;

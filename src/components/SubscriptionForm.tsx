@@ -11,11 +11,12 @@ interface Category {
 
 interface SubscriptionFormProps {
   subscription?: any;
+  templateData?: any;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export default function SubscriptionForm({ subscription, onSuccess, onCancel }: SubscriptionFormProps) {
+export default function SubscriptionForm({ subscription, templateData, onSuccess, onCancel }: SubscriptionFormProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [formData, setFormData] = useState({
     name: '',
@@ -47,8 +48,21 @@ export default function SubscriptionForm({ subscription, onSuccess, onCancel }: 
         reminderDays: subscription.reminderDays?.toString() || '3',
         notes: subscription.notes || '',
       });
+    } else if (templateData) {
+      setFormData({
+        name: templateData.name || '',
+        amount: templateData.amount?.toString() || '',
+        currency: templateData.currency || 'USD',
+        billingCycle: templateData.billingCycle || 'monthly',
+        nextBillingDate: templateData.nextBillingDate || '',
+        firstBillingDate: '',
+        status: 'active',
+        categoryId: '',
+        reminderDays: '3',
+        notes: templateData.notes || '',
+      });
     }
-  }, [subscription]);
+  }, [subscription, templateData]);
 
   const loadCategories = async () => {
     try {

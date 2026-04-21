@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
-import { LayoutDashboard, CreditCard, FolderOpen, Receipt, LogOut, User, Menu, X, Settings, Home } from 'lucide-react';
+import { LayoutDashboard, CreditCard, FolderOpen, Receipt, LogOut, User, Menu, X, Settings, Home, Shield } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import { useState } from 'react';
 
@@ -114,6 +114,15 @@ export default function Layout({ children }: LayoutProps) {
                 <Home className="h-5 w-5" />
                 <span className="font-medium">Landing Page</span>
               </button>
+              {user.isAdmin && (
+                <button
+                  onClick={() => { navigate('/admin'); setSidebarOpen(false); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-purple-400 hover:bg-purple-500/10 rounded-lg transition-colors"
+                >
+                  <Shield className="h-5 w-5" />
+                  <span className="font-medium">Admin Panel</span>
+                </button>
+              )}
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"

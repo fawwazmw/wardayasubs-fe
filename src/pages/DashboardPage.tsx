@@ -1,15 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Plus, Download, Upload } from 'lucide-react';
+import { Plus, Download, Upload, Sparkles } from 'lucide-react';
 import Layout from '../components/Layout';
 import AnalyticsDashboard from '../components/AnalyticsDashboard';
 import UpcomingRenewals from '../components/UpcomingRenewals';
 import SubscriptionList from '../components/SubscriptionList';
 import SubscriptionForm from '../components/SubscriptionForm';
+import SubscriptionTemplatePicker from '../components/SubscriptionTemplatePicker';
 import PaymentHistory from '../components/PaymentHistory';
 import CategoryManager from '../components/CategoryManager';
 import { Button } from '@/components/ui/button';
 import { subscriptionService } from '../services/subscriptions';
+import type { SubscriptionTemplate } from '../data/subscriptionTemplates';
 
 type View = 'overview' | 'subscriptions' | 'payments' | 'categories';
 
@@ -21,6 +23,8 @@ export default function DashboardPage() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [visible, setVisible] = useState(true);
   const [importing, setImporting] = useState(false);
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false);
+  const [templateData, setTemplateData] = useState<any>(null);
   const pendingView = useRef<View | null>(null);
 
   useEffect(() => {
@@ -56,6 +60,26 @@ export default function DashboardPage() {
   const handleFormCancel = () => {
     setShowSubscriptionForm(false);
     setEditingSubscription(null);
+    setTemplateData(null);
+  };
+
+  const handleTemplateSelect = (template: SubscriptionTemplate) => {
+    // Pre-fill form with template data
+    const nextMonth = new Date();
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    
+    setTemplateData({
+      name: template.name,
+      amount: template.defaultAmount,
+      currency: template.defaultCurrency,
+      billingCycle: template.defaultBillingCycle,
+      nextBillingDate: nextMonth.toISOString().split('T')[0],
+      website: template.website,
+      notes: template.description,
+      categoryName: template.category,
+    });
+    setShowTemplatePicker(false);
+    setShowSubscriptionForm(true);
   };
 
   const handleExportCSV = async () => {
@@ -176,6 +200,7 @@ export default function DashboardPage() {
                 <div className="p-6">
                   <SubscriptionForm
                     subscription={editingSubscription}
+                    templateData={templateData}
                     onSuccess={handleFormSuccess}
                     onCancel={handleFormCancel}
                   />
@@ -189,6 +214,13 @@ export default function DashboardPage() {
                     <p className="text-gray-400">Manage all your recurring subscriptions</p>
                   </div>
                   <div className="flex gap-2">
+                    <Button
+                      onClick={() => setShowTemplatePicker(true)}
+                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg shadow-blue-500/30"
+                    >
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Use Template
+                    </Button>
                     <Button
                       onClick={handleImportCSV}
                       disabled={importing}
@@ -241,6 +273,14 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+
+      {/* Template Picker Modal */}
+      {showTemplatePicker && (
+        <SubscriptionTemplatePicker
+          onSelect={handleTemplateSelect}
+          onClose={() => setShowTemplatePicker(false)}
+        />
+      )}
     </Layout>
   );
 }

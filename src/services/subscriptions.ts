@@ -40,6 +40,14 @@ export const subscriptionService = {
     return apiClient.post<{ message: string; imported: number; failed: number; errors?: string[] }>('/subscriptions/import', { subscriptions });
   },
 
+  async exportAllData(): Promise<any> {
+    return apiClient.get<any>('/subscriptions/export-all');
+  },
+
+  async importAllData(data: any): Promise<{ message: string; imported: { subscriptions: number; categories: number }; errors?: string[] }> {
+    return apiClient.post<{ message: string; imported: { subscriptions: number; categories: number }; errors?: string[] }>('/subscriptions/import-all', data);
+  },
+
   async getStats(): Promise<SubscriptionStats> {
     return apiClient.get<SubscriptionStats>('/subscriptions/stats');
   },

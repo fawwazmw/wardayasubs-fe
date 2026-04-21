@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { authService } from '../services/auth';
+import { subscriptionService } from '../services/subscriptions';
 import { toast } from 'sonner';
 import Layout from '../components/Layout';
-import { User, Lock, DollarSign, Save, Eye, EyeOff, Bell } from 'lucide-react';
+import { User, Lock, DollarSign, Save, Eye, EyeOff, Bell, Download, Upload, Database } from 'lucide-react';
 
 export default function ProfilePage() {
   const { user, refreshUser } = useAuth();
@@ -25,6 +26,8 @@ export default function ProfilePage() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [backupLoading, setBackupLoading] = useState(false);
+  const [restoreLoading, setRestoreLoading] = useState(false);
 
   const inputClasses = "w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500";
   const selectClasses = "w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white";
@@ -308,6 +311,98 @@ export default function ProfilePage() {
               </button>
             </div>
           </form>
+        </div>
+
+        {/* Data Backup & Restore */}
+        <div className="bg-slate-800/60 backdrop-blur rounded-2xl border border-white/10 overflow-hidden">
+          <div className="p-6 border-b border-white/10 flex items-center gap-3">
+            <div className="p-2 bg-green-500/20 rounded-lg">
+              <Database className="w-5 h-5 text-green-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-white">Data Backup & Restore</h3>
+          </div>
+          <div className="p-6 space-y-4">
+            <p className="text-sm text-gray-400">
+              Export all your subscriptions, categories, and payment history as a backup file. You can restore this data later or on another device.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={async () => {
+                  setBackupLoading(true);
+                  try {
+                    const data = await subscriptionService.exportAllData();
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `wardaya-subs-backup-${new Date().toISOString().split('T')[0]}.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    toast.success('Backup downloaded successfully');
+                  } catch (err: any) {
+                    toast.error(err.response?.data?.error || 'Failed to create backup');
+                  } finally {
+                    setBackupLoading(false);
+                  }
+                }}
+                disabled={backupLoading}
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed transition-all font-medium text-sm"
+              >
+                <Download className="w-4 h-4" />
+                {backupLoading ? 'Creating Backup...' : 'Download Backup'}
+              </button>
+
+              <button
+                onClick={() => {
+                  const input = document.createElement('input');
+                  input.type = 'file';
+                  input.accept = '.json';
+                  input.onchange = async (e: any) => {
+                    const file = e.target?.files?.[0];
+                    if (!file) return;
+
+                    setRestoreLoading(true);
+                    try {
+                      const text = await file.text();
+                      const data = JSON.parse(text);
+                      
+                      if (!confirm('This will import all data from the backup file. Existing data will not be deleted. Continue?')) {
+                        setRestoreLoading(false);
+                        return;
+                      }
+
+                      const result = await subscriptionService.importAllData(data);
+                      
+                      if (result.errors && result.errors.length > 0) {
+                        toast.success(`${result.message}. Some items failed to import.`);
+                      } else {
+                        toast.success(result.message);
+                      }
+                      
+                      setTimeout(() => window.location.reload(), 1500);
+                    } catch (err: any) {
+                      toast.error(err.response?.data?.error || 'Failed to restore backup');
+                    } finally {
+                      setRestoreLoading(false);
+                    }
+                  };
+                  input.click();
+                }}
+                disabled={restoreLoading}
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-slate-700/50 text-gray-300 rounded-lg hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium text-sm border border-slate-600"
+              >
+                <Upload className="w-4 h-4" />
+                {restoreLoading ? 'Restoring...' : 'Restore Backup'}
+              </button>
+            </div>
+
+            <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
+              <p className="text-xs text-yellow-300">
+                <strong>Note:</strong> Backup files contain all your subscription data. Keep them secure and don't share them publicly.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Account Info */}
