@@ -28,8 +28,13 @@ export default function Login() {
       toast.success('Login successful!');
       navigate('/dashboard');
     } catch (err: any) {
+      const code = err.response?.data?.code;
       const errorMessage = err.response?.data?.error || 'Login failed. Please try again.';
-      setError(errorMessage);
+      if (code === 'EMAIL_NOT_VERIFIED') {
+        setError('EMAIL_NOT_VERIFIED');
+      } else {
+        setError(errorMessage);
+      }
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -53,10 +58,22 @@ export default function Login() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/50 text-red-200 px-4 py-3 rounded-md">
-                <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                <span className="text-sm">{error}</span>
-              </div>
+              error === 'EMAIL_NOT_VERIFIED' ? (
+                <div className="bg-yellow-500/10 border border-yellow-500/30 text-yellow-200 px-4 py-3 rounded-md">
+                  <p className="text-sm mb-2">Your email is not verified yet.</p>
+                  <Link
+                    to="/resend-verification"
+                    className="text-sm font-medium text-purple-400 hover:text-purple-300 transition-colors"
+                  >
+                    Resend verification email
+                  </Link>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/50 text-red-200 px-4 py-3 rounded-md">
+                  <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                  <span className="text-sm">{error}</span>
+                </div>
+              )
             )}
 
             <div className="space-y-2">

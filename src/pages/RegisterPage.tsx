@@ -1,15 +1,15 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { UserPlus, AlertCircle, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { UserPlus, AlertCircle, Eye, EyeOff, ArrowLeft, CheckCircle, Mail } from 'lucide-react';
 import { toast } from 'sonner';
-import { useAuth } from '../contexts/AuthContext';
+import { authService } from '../services/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function Register() {
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const [registered, setRegistered] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -43,9 +43,9 @@ export default function Register() {
     setLoading(true);
 
     try {
-      await register(formData.email, formData.password, formData.name, formData.currency);
-      toast.success('Account created successfully!');
-      navigate('/dashboard');
+      await authService.register({ email: formData.email, password: formData.password, name: formData.name, currency: formData.currency });
+      toast.success('Account created! Check your email to verify.');
+      setRegistered(true);
     } catch (err: any) {
       const errorMessage = err.response?.data?.error || 'Registration failed. Please try again.';
       setError(errorMessage);
@@ -66,10 +66,33 @@ export default function Register() {
             <span className="text-white">wardaya</span><span className="text-purple-400">subs</span>
           </CardTitle>
           <CardDescription className="text-center text-gray-300">
-            Create your account
+            {registered ? 'Check your email' : 'Create your account'}
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {registered ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 bg-green-500/10 border border-green-500/30 text-green-300 px-4 py-3 rounded-md">
+                <Mail className="h-5 w-5 flex-shrink-0" />
+                <span className="text-sm">A verification email has been sent to <strong>{formData.email}</strong>. Please check your inbox and click the link to verify your account.</span>
+              </div>
+              <Button
+                onClick={() => navigate('/login')}
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                Go to Login
+              </Button>
+              <div className="text-center text-sm">
+                <span className="text-gray-300">Didn't receive it? </span>
+                <Link
+                  to="/resend-verification"
+                  className="font-medium text-purple-400 hover:text-purple-300 transition-colors"
+                >
+                  Resend verification email
+                </Link>
+              </div>
+            </div>
+          ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/50 text-red-200 px-4 py-3 rounded-md">
@@ -220,6 +243,7 @@ export default function Register() {
               </Link>
             </div>
           </form>
+          )}
         </CardContent>
       </Card>
     </div>
