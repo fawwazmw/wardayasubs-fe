@@ -25,6 +25,18 @@ export const authService = {
     return apiClient.get<User>('/auth/profile');
   },
 
+  async updateProfile(data: { name?: string; currency?: string; currentPassword?: string; newPassword?: string }): Promise<User> {
+    return apiClient.put<User>('/auth/profile', data);
+  },
+
+  async forgotPassword(email: string): Promise<{ message: string; resetToken?: string }> {
+    return apiClient.post<{ message: string; resetToken?: string }>('/auth/forgot-password', { email });
+  },
+
+  async resetPassword(token: string, password: string): Promise<{ message: string }> {
+    return apiClient.post<{ message: string }>('/auth/reset-password', { token, password });
+  },
+
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('user');

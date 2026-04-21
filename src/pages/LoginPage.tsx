@@ -43,8 +43,8 @@ export default function Login() {
           <div className="flex items-center justify-center mb-2">
             <LogIn className="h-8 w-8 text-purple-400" />
           </div>
-          <CardTitle className="text-2xl text-center text-white">
-            Wardaya Subs
+          <CardTitle className="text-2xl text-center">
+            <span className="text-white">wardaya</span><span className="text-purple-400">subs</span>
           </CardTitle>
           <CardDescription className="text-center text-gray-300">
             Sign in to your account
@@ -104,6 +104,15 @@ export default function Login() {
                   )}
                 </button>
               </div>
+            </div>
+
+            <div className="text-right">
+              <Link
+                to="/forgot-password"
+                className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
+              >
+                Forgot password?
+              </Link>
             </div>
 
             <Button

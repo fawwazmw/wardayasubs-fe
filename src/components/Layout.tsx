@@ -1,7 +1,9 @@
 import { ReactNode } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, CreditCard, FolderOpen, LogOut, User, Menu, X } from 'lucide-react';
+import { toast } from 'sonner';
+import { LayoutDashboard, CreditCard, FolderOpen, Receipt, LogOut, User, Menu, X, Settings, Home } from 'lucide-react';
+import NotificationBell from './NotificationBell';
 import { useState } from 'react';
 
 interface LayoutProps {
@@ -16,14 +18,17 @@ export default function Layout({ children }: LayoutProps) {
 
   const handleLogout = () => {
     logout();
+    toast.success('Logged out successfully');
     navigate('/login');
   };
 
-  const currentView = location.hash.replace('#', '') || 'overview';
+  const isOnDashboard = location.pathname === '/dashboard';
+  const currentView = isOnDashboard ? (location.hash.replace('#', '') || 'overview') : '';
 
   const navItems = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'subscriptions', label: 'Subscriptions', icon: CreditCard },
+    { id: 'payments', label: 'Payments', icon: Receipt },
     { id: 'categories', label: 'Categories', icon: FolderOpen },
   ];
 
@@ -33,35 +38,30 @@ export default function Layout({ children }: LayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-50 h-full w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed top-0 left-0 z-50 h-full w-64 bg-slate-900/95 backdrop-blur-xl border-r border-white/10 shadow-2xl transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-purple-800 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">WS</span>
-              </div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">
-                Wardaya Subs
-              </h1>
-            </div>
+          <div className="flex items-center justify-between p-6 border-b border-white/10">
+            <h1 className="text-xl font-bold">
+              <span className="text-white">wardaya</span><span className="text-purple-400">subs</span>
+            </h1>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden text-gray-500 hover:text-gray-700"
+              className="lg:hidden text-gray-400 hover:text-white transition-colors"
             >
               <X className="h-6 w-6" />
             </button>
@@ -79,7 +79,7 @@ export default function Layout({ children }: LayoutProps) {
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                     isActive
                       ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg shadow-purple-500/30'
-                      : 'text-gray-700 hover:bg-purple-50 hover:text-purple-600'
+                      : 'text-gray-400 hover:bg-white/5 hover:text-white'
                   }`}
                 >
                   <Icon className="h-5 w-5" />
@@ -91,21 +91,32 @@ export default function Layout({ children }: LayoutProps) {
 
           {/* User section */}
           {user && (
-            <div className="p-4 border-t border-gray-200">
-              <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-lg mb-2">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-800 rounded-full flex items-center justify-center">
+            <div className="p-4 border-t border-white/10">
+              <button
+                onClick={() => { navigate('/profile'); setSidebarOpen(false); }}
+                className="w-full flex items-center gap-3 px-4 py-3 bg-white/5 rounded-lg mb-2 hover:bg-white/10 transition-colors text-left"
+              >
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-700 rounded-full flex items-center justify-center">
                   <User className="h-5 w-5 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
+                  <p className="text-sm font-medium text-white truncate">
                     {user.name || 'User'}
                   </p>
-                  <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                  <p className="text-xs text-gray-400 truncate">{user.email}</p>
                 </div>
-              </div>
+                <Settings className="h-4 w-4 text-gray-500" />
+              </button>
+              <button
+                onClick={() => { navigate('/'); setSidebarOpen(false); }}
+                className="w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:bg-white/5 hover:text-white rounded-lg transition-colors"
+              >
+                <Home className="h-5 w-5" />
+                <span className="font-medium">Landing Page</span>
+              </button>
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
               >
                 <LogOut className="h-5 w-5" />
                 <span className="font-medium">Logout</span>
@@ -118,25 +129,25 @@ export default function Layout({ children }: LayoutProps) {
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Top bar for mobile */}
-        <header className="lg:hidden bg-white shadow-sm sticky top-0 z-30">
+        <header className="lg:hidden bg-slate-900/80 backdrop-blur-xl border-b border-white/10 sticky top-0 z-30">
           <div className="flex items-center justify-between px-4 py-4">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="text-gray-700 hover:text-purple-600"
+              className="text-gray-400 hover:text-white transition-colors"
             >
               <Menu className="h-6 w-6" />
             </button>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-purple-800 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">WS</span>
-              </div>
-              <h1 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">
-                Wardaya Subs
-              </h1>
-            </div>
-            <div className="w-6" /> {/* Spacer for centering */}
+            <h1 className="text-lg font-bold">
+              <span className="text-white">wardaya</span><span className="text-purple-400">subs</span>
+            </h1>
+            <NotificationBell align="right" />
           </div>
         </header>
+
+        {/* Floating notification bell - desktop */}
+        <div className="hidden lg:block fixed top-6 right-6 z-40">
+          <NotificationBell align="right" />
+        </div>
 
         {/* Page content */}
         <main className="p-4 sm:p-6 lg:p-8">

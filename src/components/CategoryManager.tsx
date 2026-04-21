@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { categoryService } from '../services/categories';
 import { Plus, Edit2, Trash2, Tag } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Category {
   id: string;
@@ -27,7 +28,7 @@ export default function CategoryManager() {
       setCategories(data);
       setError('');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to load categories');
+      setError(err.response?.data?.error || 'Failed to load categories');
     } finally {
       setLoading(false);
     }
@@ -38,15 +39,17 @@ export default function CategoryManager() {
     try {
       if (editingCategory) {
         await categoryService.update(editingCategory.id, formData);
+        toast.success('Category updated');
       } else {
         await categoryService.create(formData);
+        toast.success('Category created');
       }
       setFormData({ name: '', color: '#3B82F6' });
       setShowForm(false);
       setEditingCategory(null);
       loadCategories();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to save category');
+      toast.error(err.response?.data?.error || 'Failed to save category');
     }
   };
 
@@ -60,9 +63,10 @@ export default function CategoryManager() {
     if (!confirm('Delete this category? Subscriptions will not be deleted.')) return;
     try {
       await categoryService.delete(id);
+      toast.success('Category deleted');
       loadCategories();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to delete category');
+      toast.error(err.response?.data?.error || 'Failed to delete category');
     }
   };
 

@@ -43,7 +43,7 @@ export default function Register() {
     setLoading(true);
 
     try {
-      await register(formData.email, formData.password, formData.name);
+      await register(formData.email, formData.password, formData.name, formData.currency);
       toast.success('Account created successfully!');
       navigate('/dashboard');
     } catch (err: any) {
@@ -62,8 +62,8 @@ export default function Register() {
           <div className="flex items-center justify-center mb-2">
             <UserPlus className="h-8 w-8 text-purple-400" />
           </div>
-          <CardTitle className="text-2xl text-center text-white">
-            Wardaya Subs
+          <CardTitle className="text-2xl text-center">
+            <span className="text-white">wardaya</span><span className="text-purple-400">subs</span>
           </CardTitle>
           <CardDescription className="text-center text-gray-300">
             Create your account
