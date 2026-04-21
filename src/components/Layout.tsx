@@ -2,8 +2,11 @@ import { ReactNode } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
-import { LayoutDashboard, CreditCard, FolderOpen, Receipt, LogOut, User, Menu, X, Settings, Home, Shield } from 'lucide-react';
+import { LayoutDashboard, CreditCard, FolderOpen, Receipt, LogOut, User, Menu, X, Settings, Home, Shield, Sun, Moon } from 'lucide-react';
 import NotificationBell from './NotificationBell';
+import KeyboardShortcutsHelp from './KeyboardShortcutsHelp';
+import { useGlobalShortcuts } from '../hooks/useKeyboardShortcuts';
+import { useTheme } from '../contexts/ThemeContext';
 import { useState } from 'react';
 
 interface LayoutProps {
@@ -12,9 +15,13 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Enable global keyboard shortcuts
+  useGlobalShortcuts();
 
   const handleLogout = () => {
     logout();
@@ -149,12 +156,36 @@ export default function Layout({ children }: LayoutProps) {
             <h1 className="text-lg font-bold">
               <span className="text-white">wardaya</span><span className="text-purple-400">subs</span>
             </h1>
-            <NotificationBell align="right" />
+            <div className="flex items-center gap-2">
+              <button
+                onClick={toggleTheme}
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              >
+                {theme === 'dark' ? (
+                  <Sun className="h-5 w-5 text-gray-400 hover:text-white" />
+                ) : (
+                  <Moon className="h-5 w-5 text-gray-600 hover:text-gray-900" />
+                )}
+              </button>
+              <NotificationBell align="right" />
+            </div>
           </div>
         </header>
 
-        {/* Floating notification bell - desktop */}
-        <div className="hidden lg:block fixed top-6 right-6 z-40">
+        {/* Floating notification bell & theme toggle - desktop */}
+        <div className="hidden lg:flex fixed top-6 right-6 z-40 gap-2">
+          <button
+            onClick={toggleTheme}
+            className="p-2 bg-slate-800/60 backdrop-blur border border-white/10 hover:bg-slate-800 rounded-lg transition-colors"
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          >
+            {theme === 'dark' ? (
+              <Sun className="h-5 w-5 text-gray-400 hover:text-white" />
+            ) : (
+              <Moon className="h-5 w-5 text-gray-600 hover:text-gray-900" />
+            )}
+          </button>
           <NotificationBell align="right" />
         </div>
 
@@ -163,6 +194,9 @@ export default function Layout({ children }: LayoutProps) {
           <div className="max-w-7xl mx-auto">{children}</div>
         </main>
       </div>
+
+      {/* Keyboard Shortcuts Help Modal */}
+      <KeyboardShortcutsHelp />
     </div>
   );
 }

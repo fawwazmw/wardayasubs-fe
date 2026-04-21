@@ -15,6 +15,50 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Light theme */
+:root.light {
+  color-scheme: light;
+  color: rgba(0, 0, 0, 0.87);
+  background-color: #f8fafc;
+}
+
+:root.light .bg-gradient-to-br.from-slate-900 {
+  background: linear-gradient(to bottom right, #f1f5f9, #e2e8f0);
+}
+
+:root.light .bg-gradient-to-br.from-slate-950 {
+  background: linear-gradient(to bottom right, #f8fafc, #f1f5f9);
+}
+
+:root.light .text-white {
+  color: #0f172a;
+}
+
+:root.light .text-gray-300,
+:root.light .text-gray-400 {
+  color: #64748b;
+}
+
+:root.light .bg-slate-800,
+:root.light .bg-slate-900 {
+  background-color: #ffffff;
+}
+
+:root.light .bg-slate-800\/50,
+:root.light .bg-slate-800\/60 {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+:root.light .border-white\/10,
+:root.light .border-slate-700 {
+  border-color: #e2e8f0;
+}
+
+:root.light .bg-black\/20,
+:root.light .bg-black\/60 {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
 body {
   margin: 0;
   min-height: 100vh;

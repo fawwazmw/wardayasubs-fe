@@ -7,6 +7,7 @@ import UpcomingRenewals from '../components/UpcomingRenewals';
 import SubscriptionList from '../components/SubscriptionList';
 import SubscriptionForm from '../components/SubscriptionForm';
 import SubscriptionTemplatePicker from '../components/SubscriptionTemplatePicker';
+import OnboardingTour from '../components/OnboardingTour';
 import PaymentHistory from '../components/PaymentHistory';
 import CategoryManager from '../components/CategoryManager';
 import { Button } from '@/components/ui/button';
@@ -213,10 +214,10 @@ export default function DashboardPage() {
                     <h2 className="text-3xl font-bold text-white mb-2">My Subscriptions</h2>
                     <p className="text-gray-400">Manage all your recurring subscriptions</p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                     <Button
                       onClick={() => setShowTemplatePicker(true)}
-                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg shadow-blue-500/30"
+                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg shadow-blue-500/30 flex-1 sm:flex-none"
                     >
                       <Sparkles className="h-4 w-4 mr-2" />
                       Use Template
@@ -224,21 +225,21 @@ export default function DashboardPage() {
                     <Button
                       onClick={handleImportCSV}
                       disabled={importing}
-                      className="bg-slate-700/50 text-gray-300 hover:bg-slate-700 border border-slate-600"
+                      className="bg-slate-700/50 text-gray-300 hover:bg-slate-700 border border-slate-600 flex-1 sm:flex-none"
                     >
                       <Upload className="h-4 w-4 mr-2" />
                       {importing ? 'Importing...' : 'Import'}
                     </Button>
                     <Button
                       onClick={handleExportCSV}
-                      className="bg-slate-700/50 text-gray-300 hover:bg-slate-700 border border-slate-600"
+                      className="bg-slate-700/50 text-gray-300 hover:bg-slate-700 border border-slate-600 flex-1 sm:flex-none"
                     >
                       <Download className="h-4 w-4 mr-2" />
                       Export
                     </Button>
                     <Button
                       onClick={() => setShowSubscriptionForm(true)}
-                      className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-lg shadow-purple-500/30"
+                      className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-lg shadow-purple-500/30 w-full sm:w-auto"
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Add Subscription
@@ -281,6 +282,9 @@ export default function DashboardPage() {
           onClose={() => setShowTemplatePicker(false)}
         />
       )}
+
+      {/* Onboarding Tour */}
+      <OnboardingTour />
     </Layout>
   );
 }

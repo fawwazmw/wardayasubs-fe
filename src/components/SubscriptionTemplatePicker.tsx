@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Search, X, Sparkles } from 'lucide-react';
-import { subscriptionTemplates, getTemplatesByCategory, searchTemplates, SubscriptionTemplate } from '../data/subscriptionTemplates';
+import { subscriptionTemplates, getTemplatesByCategory, searchTemplates } from '../data/subscriptionTemplates';
+import type { SubscriptionTemplate } from '../data/subscriptionTemplates';
 import { Button } from './ui/button';
 
 interface SubscriptionTemplatePickerProps {
