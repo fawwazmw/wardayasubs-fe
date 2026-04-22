@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { notificationService } from '../services/notifications';
 import type { Notification } from '../services/notifications';
 import { Bell, Check, CheckCheck } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface NotificationBellProps {
   align?: 'left' | 'right';
@@ -11,6 +12,8 @@ export default function NotificationBell({ align = 'left' }: NotificationBellPro
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -77,7 +80,9 @@ export default function NotificationBell({ align = 'left' }: NotificationBellPro
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="relative p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/5"
+        className={`relative p-2 transition-colors rounded-lg ${
+          isDark ? 'text-gray-400 hover:text-white hover:bg-white/5' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+        }`}
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
@@ -88,9 +93,11 @@ export default function NotificationBell({ align = 'left' }: NotificationBellPro
       </button>
 
       {open && (
-        <div className={`absolute top-full mt-2 w-80 bg-slate-900 border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden ${align === 'right' ? 'right-0' : 'left-0'}`}>
-          <div className="flex items-center justify-between p-4 border-b border-white/10">
-            <h4 className="text-sm font-semibold text-white">Notifications</h4>
+        <div className={`absolute top-full mt-2 w-80 rounded-xl shadow-2xl z-50 overflow-hidden ${
+          align === 'right' ? 'right-0' : 'left-0'
+        } ${isDark ? 'bg-slate-900 border border-white/10' : 'bg-white border border-slate-200'}`}>
+          <div className={`flex items-center justify-between p-4 ${isDark ? 'border-b border-white/10' : 'border-b border-slate-200'}`}>
+            <h4 className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>Notifications</h4>
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllRead}
@@ -105,25 +112,31 @@ export default function NotificationBell({ align = 'left' }: NotificationBellPro
           <div className="max-h-80 overflow-y-auto">
             {notifications.length === 0 ? (
               <div className="p-6 text-center">
-                <Bell className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-                <p className="text-sm text-gray-500">No notifications</p>
+                <Bell className={`w-8 h-8 mx-auto mb-2 ${isDark ? 'text-gray-600' : 'text-slate-300'}`} />
+                <p className={`text-sm ${isDark ? 'text-gray-500' : 'text-slate-400'}`}>No notifications</p>
               </div>
             ) : (
               notifications.map((n) => (
                 <div
                   key={n.id}
-                  className={`flex items-start gap-3 p-3 border-b border-white/5 hover:bg-white/5 transition-colors ${
-                    !n.read ? 'bg-purple-500/5' : ''
+                  className={`flex items-start gap-3 p-3 transition-colors ${
+                    isDark
+                      ? `border-b border-white/5 hover:bg-white/5 ${!n.read ? 'bg-purple-500/5' : ''}`
+                      : `border-b border-slate-100 hover:bg-slate-50 ${!n.read ? 'bg-purple-50' : ''}`
                   }`}
                 >
                   <div className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${
                     !n.read ? 'bg-purple-500' : 'bg-transparent'
                   }`} />
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm ${!n.read ? 'text-white' : 'text-gray-400'}`}>
+                    <p className={`text-sm ${
+                      !n.read
+                        ? isDark ? 'text-white' : 'text-slate-900'
+                        : isDark ? 'text-gray-400' : 'text-slate-500'
+                    }`}>
                       {n.message}
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">{formatTime(n.createdAt)}</p>
+                    <p className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-slate-400'}`}>{formatTime(n.createdAt)}</p>
                   </div>
                   {!n.read && (
                     <button

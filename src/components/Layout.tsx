@@ -20,6 +20,8 @@ export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  const isDark = theme === 'dark';
+
   // Enable global keyboard shortcuts
   useGlobalShortcuts();
 
@@ -45,30 +47,30 @@ export default function Layout({ children }: LayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
+    <div className={`min-h-screen ${isDark ? 'bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950' : 'bg-gradient-to-br from-slate-50 via-purple-50/30 to-slate-100'}`}>
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm"
+          className={`fixed inset-0 z-40 lg:hidden backdrop-blur-sm ${isDark ? 'bg-black/60' : 'bg-black/20'}`}
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-50 h-full w-64 bg-slate-900/95 backdrop-blur-xl border-r border-white/10 shadow-2xl transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed top-0 left-0 z-50 h-full w-64 backdrop-blur-xl shadow-2xl transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        } ${isDark ? 'bg-slate-900/95 border-r border-white/10' : 'bg-white/95 border-r border-slate-200'}`}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between p-6 border-b border-white/10">
+          <div className={`flex items-center justify-between p-6 ${isDark ? 'border-b border-white/10' : 'border-b border-slate-200'}`}>
             <h1 className="text-xl font-bold">
-              <span className="text-white">wardaya</span><span className="text-purple-400">subs</span>
+              <span className={isDark ? 'text-white' : 'text-slate-900'}>wardaya</span><span className="text-purple-500">subs</span>
             </h1>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden text-gray-400 hover:text-white transition-colors"
+              className={`lg:hidden transition-colors ${isDark ? 'text-gray-400 hover:text-white' : 'text-slate-400 hover:text-slate-900'}`}
             >
               <X className="h-6 w-6" />
             </button>
@@ -86,7 +88,9 @@ export default function Layout({ children }: LayoutProps) {
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                     isActive
                       ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg shadow-purple-500/30'
-                      : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                      : isDark
+                        ? 'text-gray-400 hover:bg-white/5 hover:text-white'
+                        : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
                   }`}
                 >
                   <Icon className="h-5 w-5" />
@@ -98,25 +102,29 @@ export default function Layout({ children }: LayoutProps) {
 
           {/* User section */}
           {user && (
-            <div className="p-4 border-t border-white/10">
+            <div className={`p-4 ${isDark ? 'border-t border-white/10' : 'border-t border-slate-200'}`}>
               <button
                 onClick={() => { navigate('/profile'); setSidebarOpen(false); }}
-                className="w-full flex items-center gap-3 px-4 py-3 bg-white/5 rounded-lg mb-2 hover:bg-white/10 transition-colors text-left"
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors text-left ${
+                  isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-slate-50 hover:bg-slate-100'
+                }`}
               >
                 <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-700 rounded-full flex items-center justify-center">
                   <User className="h-5 w-5 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white truncate">
+                  <p className={`text-sm font-medium truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     {user.name || 'User'}
                   </p>
-                  <p className="text-xs text-gray-400 truncate">{user.email}</p>
+                  <p className={`text-xs truncate ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{user.email}</p>
                 </div>
-                <Settings className="h-4 w-4 text-gray-500" />
+                <Settings className={`h-4 w-4 ${isDark ? 'text-gray-500' : 'text-slate-400'}`} />
               </button>
               <button
                 onClick={() => { navigate('/'); setSidebarOpen(false); }}
-                className="w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:bg-white/5 hover:text-white rounded-lg transition-colors"
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                  isDark ? 'text-gray-400 hover:bg-white/5 hover:text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
+                }`}
               >
                 <Home className="h-5 w-5" />
                 <span className="font-medium">Landing Page</span>
@@ -145,27 +153,29 @@ export default function Layout({ children }: LayoutProps) {
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Top bar for mobile */}
-        <header className="lg:hidden bg-slate-900/80 backdrop-blur-xl border-b border-white/10 sticky top-0 z-30">
+        <header className={`lg:hidden sticky top-0 z-30 backdrop-blur-xl ${
+          isDark ? 'bg-slate-900/80 border-b border-white/10' : 'bg-white/80 border-b border-slate-200'
+        }`}>
           <div className="flex items-center justify-between px-4 py-4">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="text-gray-400 hover:text-white transition-colors"
+              className={`transition-colors ${isDark ? 'text-gray-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'}`}
             >
               <Menu className="h-6 w-6" />
             </button>
             <h1 className="text-lg font-bold">
-              <span className="text-white">wardaya</span><span className="text-purple-400">subs</span>
+              <span className={isDark ? 'text-white' : 'text-slate-900'}>wardaya</span><span className="text-purple-500">subs</span>
             </h1>
             <div className="flex items-center gap-2">
               <button
                 onClick={toggleTheme}
-                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-100'}`}
+                title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
               >
-                {theme === 'dark' ? (
-                  <Sun className="h-5 w-5 text-gray-400 hover:text-white" />
+                {isDark ? (
+                  <Sun className="h-5 w-5 text-gray-400" />
                 ) : (
-                  <Moon className="h-5 w-5 text-gray-600 hover:text-gray-900" />
+                  <Moon className="h-5 w-5 text-slate-500" />
                 )}
               </button>
               <NotificationBell align="right" />
@@ -173,21 +183,29 @@ export default function Layout({ children }: LayoutProps) {
           </div>
         </header>
 
-        {/* Floating notification bell & theme toggle - desktop */}
-        <div className="hidden lg:flex fixed top-6 right-6 z-40 gap-2">
-          <button
-            onClick={toggleTheme}
-            className="p-2 bg-slate-800/60 backdrop-blur border border-white/10 hover:bg-slate-800 rounded-lg transition-colors"
-            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-          >
-            {theme === 'dark' ? (
-              <Sun className="h-5 w-5 text-gray-400 hover:text-white" />
-            ) : (
-              <Moon className="h-5 w-5 text-gray-600 hover:text-gray-900" />
-            )}
-          </button>
-          <NotificationBell align="right" />
-        </div>
+        {/* Desktop header bar with controls */}
+        <header className={`hidden lg:block sticky top-0 z-30 backdrop-blur-xl ${
+          isDark ? 'bg-slate-950/60 border-b border-white/5' : 'bg-white/60 border-b border-slate-200/60'
+        }`}>
+          <div className="flex items-center justify-end px-8 py-[18px]">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={toggleTheme}
+                className={`p-2 rounded-lg transition-colors ${
+                  isDark ? 'hover:bg-white/10 text-gray-400 hover:text-white' : 'hover:bg-slate-100 text-slate-500 hover:text-slate-900'
+                }`}
+                title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+              >
+                {isDark ? (
+                  <Sun className="h-5 w-5" />
+                ) : (
+                  <Moon className="h-5 w-5" />
+                )}
+              </button>
+              <NotificationBell align="right" />
+            </div>
+          </div>
+        </header>
 
         {/* Page content */}
         <main className="p-4 sm:p-6 lg:p-8">

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { subscriptionService } from '../services/subscriptions';
 import { DollarSign, TrendingUp, CreditCard, Bell } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface Analytics {
   totalSubscriptions: number;
@@ -17,6 +18,8 @@ export default function AnalyticsDashboard() {
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
 
   useEffect(() => {
     loadAnalytics();
@@ -163,10 +166,10 @@ export default function AnalyticsDashboard() {
                   </Pie>
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: '#1e293b',
-                      border: '1px solid rgba(255,255,255,0.1)',
+                      backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                      border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #e2e8f0',
                       borderRadius: '8px',
-                      color: '#fff',
+                      color: isDark ? '#fff' : '#0f172a',
                       fontSize: '13px',
                     }}
                     formatter={(value: number) => [formatCurrency(value), 'Amount']}
@@ -194,26 +197,26 @@ export default function AnalyticsDashboard() {
             <div className="h-64 min-w-0">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={barData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                  <CartesianGrid strokeDasharray="3 3" stroke={isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.06)'} />
                   <XAxis
                     dataKey="name"
-                    tick={{ fill: '#9ca3af', fontSize: 11 }}
-                    axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+                    tick={{ fill: isDark ? '#9ca3af' : '#64748b', fontSize: 11 }}
+                    axisLine={{ stroke: isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0' }}
                     tickLine={false}
                   />
                   <YAxis
-                    tick={{ fill: '#9ca3af', fontSize: 11 }}
-                    axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+                    tick={{ fill: isDark ? '#9ca3af' : '#64748b', fontSize: 11 }}
+                    axisLine={{ stroke: isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0' }}
                     tickLine={false}
                     tickFormatter={(v) => `$${v}`}
                   />
                   <Tooltip
                     cursor={false}
                     contentStyle={{
-                      backgroundColor: '#1e293b',
-                      border: '1px solid rgba(255,255,255,0.1)',
+                      backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                      border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #e2e8f0',
                       borderRadius: '8px',
-                      color: '#fff',
+                      color: isDark ? '#fff' : '#0f172a',
                       fontSize: '13px',
                     }}
                     formatter={(value: number) => [formatCurrency(value), 'Monthly']}
