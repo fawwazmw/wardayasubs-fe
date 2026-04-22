@@ -1,7 +1,14 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import VerifyEmailPage from './pages/VerifyEmailPage';
+import ResendVerificationPage from './pages/ResendVerificationPage';
+import AuthCallbackPage from './pages/AuthCallbackPage';
 import DashboardPage from './pages/DashboardPage';
+import ProfilePage from './pages/ProfilePage';
+import AdminPage from './pages/AdminPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { useAuth } from './contexts/AuthContext';
@@ -26,11 +33,32 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/resend-verification" element={<ResendVerificationPage />} />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
           <Route
             path="/dashboard"
             element={
               <ProtectedRoute>
                 <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminPage />
               </ProtectedRoute>
             }
           />
@@ -44,29 +72,30 @@ function App() {
 function HomePage() {
   const { user } = useAuth();
 
-  if (user) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
       {/* Navigation */}
       <nav className="border-b border-white/10 bg-black/20 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
+            <span className="text-2xl font-bold">
+              <span className="text-white">wardaya</span><span className="text-purple-400">subs</span>
+            </span>
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
-                <BarChart3 className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-white font-bold text-xl">Wardaya Subs</span>
-            </div>
-            <div className="flex items-center space-x-3">
-              <Button asChild variant="ghost" className="text-gray-300 hover:text-white">
-                <a href="/login">Login</a>
-              </Button>
-              <Button asChild className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700">
-                <a href="/register">Get Started</a>
-              </Button>
+              {user ? (
+                <Button asChild className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 shadow-lg shadow-purple-500/30">
+                  <a href="/dashboard">Go to Dashboard</a>
+                </Button>
+              ) : (
+                <>
+                  <Button asChild variant="ghost" className="text-gray-300 hover:text-white">
+                    <a href="/login">Login</a>
+                  </Button>
+                  <Button asChild className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 shadow-lg shadow-purple-500/30">
+                    <a href="/register">Get Started</a>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -75,14 +104,14 @@ function HomePage() {
       {/* Hero Section */}
       <section className="container mx-auto px-6 py-24 md:py-32">
         <div className="text-center max-w-5xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-blue-500/10 text-blue-300 px-4 py-2 rounded-full text-sm font-medium border border-blue-500/20 mb-8">
+          <div className="inline-flex items-center gap-2 bg-purple-500/10 text-purple-300 px-4 py-2 rounded-full text-sm font-medium border border-purple-500/20 mb-8">
             <Zap className="w-4 h-4" />
             Track smarter, save more
           </div>
           
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
             Take Control of Your
-            <span className="block bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
+            <span className="block bg-gradient-to-r from-purple-400 via-fuchsia-400 to-purple-400 bg-clip-text text-transparent">
               Subscription Spending
             </span>
           </h1>
@@ -96,7 +125,7 @@ function HomePage() {
             <Button 
               asChild 
               size="lg" 
-              className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-lg px-8 shadow-lg shadow-blue-500/30"
+              className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-lg px-8 shadow-lg shadow-purple-500/30"
             >
               <a href="/register" className="flex items-center gap-2">
                 Start Free Today
@@ -151,7 +180,7 @@ function HomePage() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           <Card className="bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all">
             <CardHeader>
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-700 rounded-lg flex items-center justify-center mb-4">
                 <BarChart3 className="w-6 h-6 text-white" />
               </div>
               <CardTitle className="text-white">Smart Analytics</CardTitle>
@@ -226,10 +255,10 @@ function HomePage() {
       {/* Benefits Section */}
       <section className="container mx-auto px-6 py-20">
         <div className="max-w-4xl mx-auto">
-          <Card className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border-blue-500/20 backdrop-blur-sm">
+          <Card className="bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10 border-purple-500/20 backdrop-blur-sm">
             <CardHeader className="text-center pb-8">
               <CardTitle className="text-3xl md:text-4xl text-white mb-4">
-                Why Choose Wardaya Subs?
+                Why Choose <span className="text-white">wardaya</span><span className="text-purple-400">subs</span>?
               </CardTitle>
               <CardDescription className="text-gray-300 text-lg">
                 Join users who are taking control of their subscription spending
@@ -283,7 +312,7 @@ function HomePage() {
           <Button 
             asChild 
             size="lg" 
-            className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-lg px-10 shadow-lg shadow-blue-500/30"
+            className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-lg px-10 shadow-lg shadow-purple-500/30"
           >
             <a href="/register" className="flex items-center gap-2">
               Get Started for Free
@@ -297,7 +326,7 @@ function HomePage() {
       <footer className="border-t border-white/10 bg-black/20 backdrop-blur-sm">
         <div className="container mx-auto px-6 py-8">
           <div className="text-center text-gray-400">
-            <p>© 2026 Wardaya Subs. Built for better financial control.</p>
+            <p>© 2026 <span className="text-white">wardaya</span><span className="text-purple-400">subs</span>. Built for better financial control.</p>
           </div>
         </div>
       </footer>

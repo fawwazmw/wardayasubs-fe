@@ -32,6 +32,22 @@ export const subscriptionService = {
     return apiClient.delete<void>(`/subscriptions/${id}`);
   },
 
+  async bulkDelete(ids: string[]): Promise<{ message: string; count: number }> {
+    return apiClient.post<{ message: string; count: number }>('/subscriptions/bulk-delete', { ids });
+  },
+
+  async importCSV(subscriptions: any[]): Promise<{ message: string; imported: number; failed: number; errors?: string[] }> {
+    return apiClient.post<{ message: string; imported: number; failed: number; errors?: string[] }>('/subscriptions/import', { subscriptions });
+  },
+
+  async exportAllData(): Promise<any> {
+    return apiClient.get<any>('/subscriptions/export-all');
+  },
+
+  async importAllData(data: any): Promise<{ message: string; imported: { subscriptions: number; categories: number }; errors?: string[] }> {
+    return apiClient.post<{ message: string; imported: { subscriptions: number; categories: number }; errors?: string[] }>('/subscriptions/import-all', data);
+  },
+
   async getStats(): Promise<SubscriptionStats> {
     return apiClient.get<SubscriptionStats>('/subscriptions/stats');
   },

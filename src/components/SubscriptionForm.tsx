@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { subscriptionService } from '../services/subscriptions';
 import { categoryService } from '../services/categories';
+import { toast } from 'sonner';
 
 interface Category {
   id: string;
@@ -10,20 +11,21 @@ interface Category {
 
 interface SubscriptionFormProps {
   subscription?: any;
+  templateData?: any;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export default function SubscriptionForm({ subscription, onSuccess, onCancel }: SubscriptionFormProps) {
+export default function SubscriptionForm({ subscription, templateData, onSuccess, onCancel }: SubscriptionFormProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     amount: '',
     currency: 'USD',
-    billingCycle: 'MONTHLY',
+    billingCycle: 'monthly',
     nextBillingDate: '',
     firstBillingDate: '',
-    status: 'ACTIVE',
+    status: 'active',
     categoryId: '',
     reminderDays: '3',
     notes: '',
@@ -38,23 +40,36 @@ export default function SubscriptionForm({ subscription, onSuccess, onCancel }: 
         name: subscription.name || '',
         amount: subscription.amount?.toString() || '',
         currency: subscription.currency || 'USD',
-        billingCycle: subscription.billingCycle || 'MONTHLY',
+        billingCycle: (subscription.billingCycle || 'monthly').toLowerCase(),
         nextBillingDate: subscription.nextBillingDate?.split('T')[0] || '',
-        firstBillingDate: subscription.firstBillingDate?.split('T')[0] || '',
-        status: subscription.status || 'ACTIVE',
+        firstBillingDate: subscription.startDate?.split('T')[0] || '',
+        status: subscription.isActive === false ? 'inactive' : 'active',
         categoryId: subscription.categoryId || '',
         reminderDays: subscription.reminderDays?.toString() || '3',
         notes: subscription.notes || '',
       });
+    } else if (templateData) {
+      setFormData({
+        name: templateData.name || '',
+        amount: templateData.amount?.toString() || '',
+        currency: templateData.currency || 'USD',
+        billingCycle: templateData.billingCycle || 'monthly',
+        nextBillingDate: templateData.nextBillingDate || '',
+        firstBillingDate: '',
+        status: 'active',
+        categoryId: '',
+        reminderDays: '3',
+        notes: templateData.notes || '',
+      });
     }
-  }, [subscription]);
+  }, [subscription, templateData]);
 
   const loadCategories = async () => {
     try {
       const data = await categoryService.getAll();
       setCategories(data);
-    } catch (err) {
-      console.error('Failed to load categories:', err);
+    } catch {
+      // Categories are optional — form still works without them
     }
   };
 
@@ -70,8 +85,7 @@ export default function SubscriptionForm({ subscription, onSuccess, onCancel }: 
         currency: formData.currency,
         billingCycle: formData.billingCycle,
         nextBillingDate: new Date(formData.nextBillingDate).toISOString(),
-        firstBillingDate: formData.firstBillingDate ? new Date(formData.firstBillingDate).toISOString() : undefined,
-        status: formData.status,
+        startDate: formData.firstBillingDate ? new Date(formData.firstBillingDate).toISOString() : undefined,
         categoryId: formData.categoryId || undefined,
         reminderDays: parseInt(formData.reminderDays),
         notes: formData.notes || undefined,
@@ -79,13 +93,17 @@ export default function SubscriptionForm({ subscription, onSuccess, onCancel }: 
 
       if (subscription) {
         await subscriptionService.update(subscription.id, payload);
+        toast.success('Subscription updated');
       } else {
         await subscriptionService.create(payload);
+        toast.success('Subscription created');
       }
 
       onSuccess();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to save subscription');
+      const msg = err.response?.data?.error || 'Failed to save subscription';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -98,6 +116,10 @@ export default function SubscriptionForm({ subscription, onSuccess, onCancel }: 
     });
   };
 
+  const inputClasses = "w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500";
+  const selectClasses = "w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white";
+  const labelClasses = "block text-sm font-medium text-gray-300 mb-2";
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
@@ -107,7 +129,7 @@ export default function SubscriptionForm({ subscription, onSuccess, onCancel }: 
       )}
 
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
+        <label className={labelClasses}>
           Subscription Name *
         </label>
         <input
@@ -116,14 +138,14 @@ export default function SubscriptionForm({ subscription, onSuccess, onCancel }: 
           value={formData.name}
           onChange={handleChange}
           required
-          className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
+          className={inputClasses}
           placeholder="Netflix, Spotify, etc."
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
+          <label className={labelClasses}>
             Amount *
           </label>
           <input
@@ -134,13 +156,13 @@ export default function SubscriptionForm({ subscription, onSuccess, onCancel }: 
             required
             step="0.01"
             min="0"
-            className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
+            className={inputClasses}
             placeholder="9.99"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
+          <label className={labelClasses}>
             Currency *
           </label>
           <select
@@ -148,18 +170,18 @@ export default function SubscriptionForm({ subscription, onSuccess, onCancel }: 
             value={formData.currency}
             onChange={handleChange}
             required
-            className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white"
+            className={selectClasses}
           >
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-            <option value="GBP">GBP</option>
-            <option value="IDR">IDR</option>
+            <option value="USD" className="bg-slate-800 text-white">USD</option>
+            <option value="EUR" className="bg-slate-800 text-white">EUR</option>
+            <option value="GBP" className="bg-slate-800 text-white">GBP</option>
+            <option value="IDR" className="bg-slate-800 text-white">IDR</option>
           </select>
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
+        <label className={labelClasses}>
           Billing Cycle *
         </label>
         <select
@@ -167,18 +189,18 @@ export default function SubscriptionForm({ subscription, onSuccess, onCancel }: 
           value={formData.billingCycle}
           onChange={handleChange}
           required
-          className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white"
+          className={selectClasses}
         >
-          <option value="MONTHLY">Monthly</option>
-          <option value="YEARLY">Yearly</option>
-          <option value="WEEKLY">Weekly</option>
-          <option value="QUARTERLY">Quarterly</option>
+          <option value="monthly" className="bg-slate-800 text-white">Monthly</option>
+          <option value="yearly" className="bg-slate-800 text-white">Yearly</option>
+          <option value="weekly" className="bg-slate-800 text-white">Weekly</option>
+          <option value="quarterly" className="bg-slate-800 text-white">Quarterly</option>
         </select>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
+          <label className={labelClasses}>
             Next Billing Date *
           </label>
           <input
@@ -187,12 +209,12 @@ export default function SubscriptionForm({ subscription, onSuccess, onCancel }: 
             value={formData.nextBillingDate}
             onChange={handleChange}
             required
-            className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white"
+            className={inputClasses}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
+          <label className={labelClasses}>
             First Billing Date
           </label>
           <input
@@ -200,51 +222,32 @@ export default function SubscriptionForm({ subscription, onSuccess, onCancel }: 
             name="firstBillingDate"
             value={formData.firstBillingDate}
             onChange={handleChange}
-            className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white"
+            className={inputClasses}
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Status *
-          </label>
-          <select
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white"
-          >
-            <option value="ACTIVE">Active</option>
-            <option value="PAUSED">Paused</option>
-            <option value="CANCELLED">Cancelled</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Category
-          </label>
-          <select
-            name="categoryId"
-            value={formData.categoryId}
-            onChange={handleChange}
-            className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white"
-          >
-            <option value="">No category</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div>
+        <label className={labelClasses}>
+          Category
+        </label>
+        <select
+          name="categoryId"
+          value={formData.categoryId}
+          onChange={handleChange}
+          className={selectClasses}
+        >
+          <option value="" className="bg-slate-800 text-white">No category</option>
+          {categories.map((cat) => (
+            <option key={cat.id} value={cat.id} className="bg-slate-800 text-white">
+              {cat.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
+        <label className={labelClasses}>
           Reminder Days Before
         </label>
         <input
@@ -253,12 +256,12 @@ export default function SubscriptionForm({ subscription, onSuccess, onCancel }: 
           value={formData.reminderDays}
           onChange={handleChange}
           min="0"
-          className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white"
+          className={inputClasses}
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
+        <label className={labelClasses}>
           Notes
         </label>
         <textarea
@@ -266,7 +269,7 @@ export default function SubscriptionForm({ subscription, onSuccess, onCancel }: 
           value={formData.notes}
           onChange={handleChange}
           rows={3}
-          className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500 resize-none"
+          className={`${inputClasses} resize-none`}
           placeholder="Additional notes..."
         />
       </div>

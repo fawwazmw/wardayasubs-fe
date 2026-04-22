@@ -3,6 +3,11 @@ export interface User {
   email: string;
   name: string;
   currency: string;
+  isAdmin?: boolean;
+  googleId?: string | null;
+  avatar?: string | null;
+  notifyRenewalReminders?: boolean;
+  notifyEmailReminders?: boolean;
   createdAt: string;
   updatedAt?: string;
 }
