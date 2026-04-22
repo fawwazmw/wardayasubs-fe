@@ -23,4 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 
+# Environment files (may contain secrets)
 .env
+.env.development
+.env.production
+!.env.example
