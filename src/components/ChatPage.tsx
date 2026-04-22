@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, ImagePlus, Bot, User, Loader2, CreditCard, Plus, Trash2, MessageCircle, PanelLeftOpen, ArrowLeft } from 'lucide-react';
-import { chatService, type ChatSession, type ChatResponse } from '../services/chat';
+import { Send, ImagePlus, Bot, User, Loader2, CreditCard, Plus, Trash2, MessageCircle, PanelLeftOpen, ArrowLeft, DollarSign, Tag, Power } from 'lucide-react';
+import { chatService, type ChatSession, type ChatResponse, type ActionResult } from '../services/chat';
 import { useTheme } from '../contexts/ThemeContext';
 import { toast } from 'sonner';
 
@@ -11,7 +11,75 @@ interface DisplayMessage {
   imageUrl?: string;
   action?: string;
   subscription?: any;
+  payment?: any;
+  category?: any;
+  deletedName?: string;
+  actions?: ActionResult[];
   loading?: boolean;
+}
+
+function ActionCard({ isDark, action, icon, children }: {
+  isDark: boolean; action: string; icon: React.ReactNode; children: React.ReactNode;
+}) {
+  const colors: Record<string, { bg: string; border: string; text: string; icon: string }> = {
+    add_subscription:    { bg: isDark ? 'bg-green-500/10' : 'bg-green-50', border: isDark ? 'border-green-500/20' : 'border-green-200', text: isDark ? 'text-green-400' : 'text-green-700', icon: 'text-green-500' },
+    update_subscription: { bg: isDark ? 'bg-blue-500/10' : 'bg-blue-50', border: isDark ? 'border-blue-500/20' : 'border-blue-200', text: isDark ? 'text-blue-400' : 'text-blue-700', icon: 'text-blue-500' },
+    toggle_subscription: { bg: isDark ? 'bg-yellow-500/10' : 'bg-yellow-50', border: isDark ? 'border-yellow-500/20' : 'border-yellow-200', text: isDark ? 'text-yellow-400' : 'text-yellow-700', icon: 'text-yellow-500' },
+    record_payment:      { bg: isDark ? 'bg-purple-500/10' : 'bg-purple-50', border: isDark ? 'border-purple-500/20' : 'border-purple-200', text: isDark ? 'text-purple-400' : 'text-purple-700', icon: 'text-purple-500' },
+    create_category:     { bg: isDark ? 'bg-indigo-500/10' : 'bg-indigo-50', border: isDark ? 'border-indigo-500/20' : 'border-indigo-200', text: isDark ? 'text-indigo-400' : 'text-indigo-700', icon: 'text-indigo-500' },
+    delete:              { bg: isDark ? 'bg-red-500/10' : 'bg-red-50', border: isDark ? 'border-red-500/20' : 'border-red-200', text: isDark ? 'text-red-400' : 'text-red-700', icon: 'text-red-500' },
+  };
+  const c = colors[action] || colors['add_subscription'];
+
+  return (
+    <div className={`mt-2 p-2 sm:p-2.5 rounded-lg flex items-center gap-2 border ${c.bg} ${c.border}`}>
+      <div className={`flex-shrink-0 ${c.icon}`}>{icon}</div>
+      <div className={`text-xs min-w-0 ${c.text}`}>{children}</div>
+    </div>
+  );
+}
+
+function ActionResultCard({ r, isDark }: { r: any; isDark: boolean }) {
+  if (r.subscription) {
+    const act = r.action || '';
+    return (
+      <ActionCard isDark={isDark} action={act} icon={
+        act === 'toggle_subscription' ? <Power className="w-4 h-4" /> : <CreditCard className="w-4 h-4" />
+      }>
+        <p className="font-medium truncate">
+          {act === 'update_subscription' ? 'Updated: ' : act === 'toggle_subscription' ? (r.subscription.isActive ? 'Activated: ' : 'Deactivated: ') : ''}
+          {r.subscription.name}
+        </p>
+        <p className="truncate">
+          {r.subscription.currency} {r.subscription.amount}/{r.subscription.billingCycle}
+          {r.subscription.category ? ` - ${r.subscription.category.name}` : ''}
+        </p>
+      </ActionCard>
+    );
+  }
+  if (r.payment) {
+    return (
+      <ActionCard isDark={isDark} action="record_payment" icon={<DollarSign className="w-4 h-4" />}>
+        <p className="font-medium truncate">Payment: {r.payment.subscription?.name}</p>
+        <p className="truncate">{r.payment.currency} {r.payment.amount} on {new Date(r.payment.paidAt).toLocaleDateString()}</p>
+      </ActionCard>
+    );
+  }
+  if (r.category) {
+    return (
+      <ActionCard isDark={isDark} action="create_category" icon={<Tag className="w-4 h-4" />}>
+        <p className="font-medium truncate">Category: {r.category.name}</p>
+      </ActionCard>
+    );
+  }
+  if (r.deletedName) {
+    return (
+      <ActionCard isDark={isDark} action="delete" icon={<Trash2 className="w-4 h-4" />}>
+        <p className="font-medium truncate">Deleted: {r.deletedName}</p>
+      </ActionCard>
+    );
+  }
+  return null;
 }
 
 export default function ChatPage() {
@@ -119,7 +187,12 @@ export default function ChatPage() {
     try {
       const sessionId = await ensureSession();
       const res = await chatService.sendMessage(sessionId, text);
-      updateMessage(loadingId, { content: res.message, loading: false, action: res.action, subscription: res.subscription });
+      updateMessage(loadingId, {
+        content: res.message, loading: false, action: res.action,
+        subscription: res.subscription, payment: res.payment,
+        category: res.category, deletedName: res.deletedName,
+        actions: res.actions,
+      });
       handleActionToast(res);
       loadSessions();
     } catch (err: any) {
@@ -140,7 +213,12 @@ export default function ChatPage() {
     try {
       const sessionId = await ensureSession();
       const res = await chatService.sendImage(sessionId, file);
-      updateMessage(loadingId, { content: res.message, loading: false, action: res.action, subscription: res.subscription });
+      updateMessage(loadingId, {
+        content: res.message, loading: false, action: res.action,
+        subscription: res.subscription, payment: res.payment,
+        category: res.category, deletedName: res.deletedName,
+        actions: res.actions,
+      });
       handleActionToast(res);
       loadSessions();
     } catch (err: any) {
@@ -150,9 +228,38 @@ export default function ChatPage() {
     }
   };
 
+  const toastForAction = (r: ActionResult) => {
+    switch (r.action) {
+      case 'add_subscription':
+        if (r.subscription) toast.success(`Added "${r.subscription.name}"!`);
+        break;
+      case 'update_subscription':
+        if (r.subscription) toast.success(`Updated "${r.subscription.name}"!`);
+        break;
+      case 'delete_subscription':
+        if (r.deletedName) toast.success(`Deleted "${r.deletedName}"!`);
+        break;
+      case 'toggle_subscription':
+        if (r.subscription) toast.success(`${r.subscription.isActive ? 'Activated' : 'Deactivated'} "${r.subscription.name}"!`);
+        break;
+      case 'record_payment':
+        if (r.payment) toast.success(`Payment recorded for "${r.payment.subscription.name}"!`);
+        break;
+      case 'create_category':
+        if (r.category) toast.success(`Category "${r.category.name}" created!`);
+        break;
+      case 'delete_category':
+        if (r.deletedName) toast.success(`Category "${r.deletedName}" deleted!`);
+        break;
+    }
+  };
+
   const handleActionToast = (res: ChatResponse) => {
-    if (res.action === 'add_subscription' && res.subscription) toast.success(`Added "${res.subscription.name}"!`);
-    else if (res.action === 'update_subscription' && res.subscription) toast.success(`Updated "${res.subscription.name}"!`);
+    if (res.actions) {
+      res.actions.forEach(toastForAction);
+    } else {
+      toastForAction(res);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -359,31 +466,13 @@ export default function ChatPage() {
                         return <span key={i}>{part}</span>;
                       })}
                     </div>
-                    {msg.subscription && (
-                      <div className={`mt-2 p-2 sm:p-2.5 rounded-lg flex items-center gap-2 ${
-                        msg.action === 'update_subscription'
-                          ? isDark ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-blue-50 border border-blue-200'
-                          : isDark ? 'bg-green-500/10 border border-green-500/20' : 'bg-green-50 border border-green-200'
-                      }`}>
-                        <CreditCard className={`w-4 h-4 flex-shrink-0 ${msg.action === 'update_subscription' ? 'text-blue-500' : 'text-green-500'}`} />
-                        <div className="text-xs min-w-0">
-                          <p className={`font-medium truncate ${
-                            msg.action === 'update_subscription'
-                              ? isDark ? 'text-blue-400' : 'text-blue-700'
-                              : isDark ? 'text-green-400' : 'text-green-700'
-                          }`}>
-                            {msg.action === 'update_subscription' ? 'Updated: ' : ''}{msg.subscription.name}
-                          </p>
-                          <p className={`truncate ${
-                            msg.action === 'update_subscription'
-                              ? isDark ? 'text-blue-400/70' : 'text-blue-600'
-                              : isDark ? 'text-green-400/70' : 'text-green-600'
-                          }`}>
-                            {msg.subscription.currency} {msg.subscription.amount}/{msg.subscription.billingCycle}
-                            {msg.subscription.category ? ` - ${msg.subscription.category.name}` : ''}
-                          </p>
-                        </div>
-                      </div>
+                    {/* Action result cards — multi or single */}
+                    {msg.actions ? (
+                      msg.actions.map((r, i) => (
+                        <ActionResultCard key={i} r={r} isDark={isDark} />
+                      ))
+                    ) : (
+                      <ActionResultCard r={msg} isDark={isDark} />
                     )}
                   </>
                 )}

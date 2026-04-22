@@ -16,23 +16,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const loadProfile = useCallback(async () => {
     const token = localStorage.getItem('token');
-    if (token) {
-      authService.getProfile()
-        .then(setUser)
-        .catch((err) => {
-          // Only clear token on 401 (invalid/expired token), not on network errors
-          if (err.response?.status === 401) {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-          }
-        })
-        .finally(() => setLoading(false));
-    } else {
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const profile = await authService.getProfile();
+      setUser(profile);
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        // Token is invalid/expired — clear it
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setUser(null);
+      }
+      // Network error / backend down — keep token, user stays null but token preserved.
+      // ProtectedRoute will still allow access since hasToken is true.
+    } finally {
       setLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    loadProfile();
+  }, [loadProfile]);
 
   const login = async (email: string, password: string) => {
     await authService.login({ email, password });

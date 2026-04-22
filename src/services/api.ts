@@ -25,15 +25,15 @@ class ApiClient {
       (error) => Promise.reject(error)
     );
 
-    // Response interceptor to handle errors
+    // Response interceptor — only clear token on explicit 401 from non-auth endpoints
     this.client.interceptors.response.use(
       (response) => response,
       (error: AxiosError) => {
-        // Only redirect to login if it's not a login/register request
-        if (error.response?.status === 401 && 
-            !error.config?.url?.includes('/auth/login') && 
-            !error.config?.url?.includes('/auth/register') &&
-            !error.config?.url?.includes('/auth/profile')) {
+        // Only wipe session on 401 from actual API calls (not auth endpoints, not network errors)
+        if (
+          error.response?.status === 401 &&
+          !error.config?.url?.includes('/auth/')
+        ) {
           localStorage.removeItem('token');
           localStorage.removeItem('user');
           window.location.href = '/login';

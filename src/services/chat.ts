@@ -31,10 +31,18 @@ export interface ChatSessionDetail {
   updatedAt: string;
 }
 
-export interface ChatResponse {
-  action: 'add_subscription' | 'update_subscription' | 'query' | 'chat' | 'clarify';
+export interface ActionResult {
+  action: string;
   message: string;
   subscription?: any;
+  payment?: any;
+  category?: any;
+  deletedName?: string;
+}
+
+export interface ChatResponse extends ActionResult {
+  // Multi-action responses include an actions array
+  actions?: ActionResult[];
 }
 
 export const chatService = {
