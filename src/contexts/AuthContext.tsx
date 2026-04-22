@@ -21,9 +21,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (token) {
       authService.getProfile()
         .then(setUser)
-        .catch(() => {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
+        .catch((err) => {
+          // Only clear token on 401 (invalid/expired token), not on network errors
+          if (err.response?.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+          }
         })
         .finally(() => setLoading(false));
     } else {
