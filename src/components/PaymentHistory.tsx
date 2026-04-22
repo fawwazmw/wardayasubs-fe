@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { paymentService } from '../services/payments';
 import type { Payment } from '../services/payments';
 import { subscriptionService } from '../services/subscriptions';
-import { Calendar, DollarSign, Trash2, Plus, Receipt, Filter } from 'lucide-react';
+import { Calendar, DollarSign, Trash2, Plus, Receipt } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Subscription {

@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 interface Category {
   id: string;
   name: string;
-  color: string;
+  color?: string;
 }
 
 export default function CategoryManager() {
@@ -55,7 +55,7 @@ export default function CategoryManager() {
 
   const handleEdit = (category: Category) => {
     setEditingCategory(category);
-    setFormData({ name: category.name, color: category.color });
+    setFormData({ name: category.name, color: category.color || '#3B82F6' });
     setShowForm(true);
   };
 

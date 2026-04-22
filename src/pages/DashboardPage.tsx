@@ -125,17 +125,17 @@ export default function DashboardPage() {
       setImporting(true);
       try {
         const text = await file.text();
-        const lines = text.split('\n').filter(l => l.trim());
+        const lines = text.split('\n').filter((l: string) => l.trim());
         if (lines.length < 2) {
           alert('CSV file is empty or invalid');
           return;
         }
 
-        const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+        lines[0].split(',').map((h: string) => h.trim().replace(/^"|"$/g, ''));
         const subscriptions = [];
 
         for (let i = 1; i < lines.length; i++) {
-          const values = lines[i].match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g)?.map(v => v.trim().replace(/^"|"$/g, '')) || [];
+          const values = lines[i].match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g)?.map((v: string) => v.trim().replace(/^"|"$/g, '')) || [];
           if (values.length < 5) continue;
 
           const [name, amount, currency, billingCycle, nextBillingDate, status, categoryName, notes] = values;

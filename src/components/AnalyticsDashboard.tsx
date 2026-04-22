@@ -172,7 +172,7 @@ export default function AnalyticsDashboard() {
                       color: isDark ? '#fff' : '#0f172a',
                       fontSize: '13px',
                     }}
-                    formatter={(value: number) => [formatCurrency(value), 'Amount']}
+                    formatter={(value: any) => [formatCurrency(value as number), 'Amount']}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -219,7 +219,7 @@ export default function AnalyticsDashboard() {
                       color: isDark ? '#fff' : '#0f172a',
                       fontSize: '13px',
                     }}
-                    formatter={(value: number) => [formatCurrency(value), 'Monthly']}
+                    formatter={(value: any) => [formatCurrency(value as number), 'Monthly']}
                   />
                   <Bar dataKey="amount" radius={[6, 6, 0, 0]} activeBar={{ stroke: '#fff', strokeWidth: 2 }}>
                     {barData.map((_, index) => (
