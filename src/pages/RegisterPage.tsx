@@ -1,6 +1,6 @@
-import { useState, FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { UserPlus, AlertCircle, Eye, EyeOff, ArrowLeft, CheckCircle, Mail } from 'lucide-react';
+import { UserPlus, AlertCircle, Eye, EyeOff, ArrowLeft, Mail } from 'lucide-react';
 import { toast } from 'sonner';
 import { authService } from '../services/auth';
 import { Button } from '@/components/ui/button';

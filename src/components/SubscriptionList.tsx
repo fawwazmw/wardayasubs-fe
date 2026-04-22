@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { subscriptionService } from '../services/subscriptions';
 import { categoryService } from '../services/categories';
-import { Calendar, DollarSign, Edit2, Trash2, Tag, Search, Filter, Power, CheckSquare, Square } from 'lucide-react';
+import { Calendar, DollarSign, Edit2, Trash2, Tag, Search, Filter, CheckSquare, Square } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Category {
   id: string;
   name: string;
-  color: string;
+  color?: string;
 }
 
 interface Subscription {
@@ -21,7 +21,7 @@ interface Subscription {
   category?: {
     id: string;
     name: string;
-    color: string;
+    color?: string;
   };
 }
 

@@ -4,7 +4,7 @@ import { authService } from '../services/auth';
 import { subscriptionService } from '../services/subscriptions';
 import { toast } from 'sonner';
 import Layout from '../components/Layout';
-import { User, Lock, DollarSign, Save, Eye, EyeOff, Bell, Download, Upload, Database, Sun, Moon, Monitor } from 'lucide-react';
+import { User, Lock, Save, Eye, EyeOff, Bell, Download, Upload, Database, Sun, Moon, Monitor } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
 export default function ProfilePage() {

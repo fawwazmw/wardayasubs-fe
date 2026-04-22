@@ -1,4 +1,4 @@
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { LogIn, AlertCircle, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';

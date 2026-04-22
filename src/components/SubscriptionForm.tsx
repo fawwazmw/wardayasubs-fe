@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 interface Category {
   id: string;
   name: string;
-  color: string;
+  color?: string;
 }
 
 interface SubscriptionFormProps {
@@ -83,7 +83,7 @@ export default function SubscriptionForm({ subscription, templateData, onSuccess
         name: formData.name,
         amount: parseFloat(formData.amount),
         currency: formData.currency,
-        billingCycle: formData.billingCycle,
+        billingCycle: formData.billingCycle as any,
         nextBillingDate: new Date(formData.nextBillingDate).toISOString(),
         startDate: formData.firstBillingDate ? new Date(formData.firstBillingDate).toISOString() : undefined,
         categoryId: formData.categoryId || undefined,
