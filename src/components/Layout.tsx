@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
-import { LayoutDashboard, CreditCard, FolderOpen, Receipt, LogOut, User, Menu, X, Settings, Home, Shield, Sun, Moon } from 'lucide-react';
+import { LayoutDashboard, CreditCard, FolderOpen, Receipt, LogOut, User, Menu, X, Settings, Home, Shield, MessageCircle } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import KeyboardShortcutsHelp from './KeyboardShortcutsHelp';
 import { useGlobalShortcuts } from '../hooks/useKeyboardShortcuts';
@@ -15,7 +15,7 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const { user, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -39,6 +39,7 @@ export default function Layout({ children }: LayoutProps) {
     { id: 'subscriptions', label: 'Subscriptions', icon: CreditCard },
     { id: 'payments', label: 'Payments', icon: Receipt },
     { id: 'categories', label: 'Categories', icon: FolderOpen },
+    { id: 'chat', label: 'AI Assistant', icon: MessageCircle },
   ];
 
   const handleNavClick = (viewId: string) => {
@@ -63,17 +64,20 @@ export default function Layout({ children }: LayoutProps) {
         } ${isDark ? 'bg-slate-900/95 border-r border-white/10' : 'bg-white/95 border-r border-slate-200'}`}
       >
         <div className="flex flex-col h-full">
-          {/* Logo */}
+          {/* Logo + Notification */}
           <div className={`flex items-center justify-between p-6 ${isDark ? 'border-b border-white/10' : 'border-b border-slate-200'}`}>
             <h1 className="text-xl font-bold">
               <span className={isDark ? 'text-white' : 'text-slate-900'}>wardaya</span><span className="text-purple-500">subs</span>
             </h1>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className={`lg:hidden transition-colors ${isDark ? 'text-gray-400 hover:text-white' : 'text-slate-400 hover:text-slate-900'}`}
-            >
-              <X className="h-6 w-6" />
-            </button>
+            <div className="flex items-center gap-1">
+              <NotificationBell align="left" />
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className={`lg:hidden transition-colors ${isDark ? 'text-gray-400 hover:text-white' : 'text-slate-400 hover:text-slate-900'}`}
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
           </div>
 
           {/* Navigation */}
@@ -152,7 +156,7 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* Main content */}
       <div className="lg:pl-64">
-        {/* Top bar for mobile */}
+        {/* Top bar for mobile only */}
         <header className={`lg:hidden sticky top-0 z-30 backdrop-blur-xl ${
           isDark ? 'bg-slate-900/80 border-b border-white/10' : 'bg-white/80 border-b border-slate-200'
         }`}>
@@ -166,44 +170,7 @@ export default function Layout({ children }: LayoutProps) {
             <h1 className="text-lg font-bold">
               <span className={isDark ? 'text-white' : 'text-slate-900'}>wardaya</span><span className="text-purple-500">subs</span>
             </h1>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={toggleTheme}
-                className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-100'}`}
-                title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
-              >
-                {isDark ? (
-                  <Sun className="h-5 w-5 text-gray-400" />
-                ) : (
-                  <Moon className="h-5 w-5 text-slate-500" />
-                )}
-              </button>
-              <NotificationBell align="right" />
-            </div>
-          </div>
-        </header>
-
-        {/* Desktop header bar with controls */}
-        <header className={`hidden lg:block sticky top-0 z-30 backdrop-blur-xl ${
-          isDark ? 'bg-slate-950/60 border-b border-white/5' : 'bg-white/60 border-b border-slate-200/60'
-        }`}>
-          <div className="flex items-center justify-end px-8 py-[18px]">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={toggleTheme}
-                className={`p-2 rounded-lg transition-colors ${
-                  isDark ? 'hover:bg-white/10 text-gray-400 hover:text-white' : 'hover:bg-slate-100 text-slate-500 hover:text-slate-900'
-                }`}
-                title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
-              >
-                {isDark ? (
-                  <Sun className="h-5 w-5" />
-                ) : (
-                  <Moon className="h-5 w-5" />
-                )}
-              </button>
-              <NotificationBell align="right" />
-            </div>
+            <NotificationBell align="right" />
           </div>
         </header>
 

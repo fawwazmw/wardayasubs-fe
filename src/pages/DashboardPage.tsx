@@ -10,11 +10,12 @@ import SubscriptionTemplatePicker from '../components/SubscriptionTemplatePicker
 import OnboardingTour from '../components/OnboardingTour';
 import PaymentHistory from '../components/PaymentHistory';
 import CategoryManager from '../components/CategoryManager';
+import ChatPage from '../components/ChatPage';
 import { Button } from '@/components/ui/button';
 import { subscriptionService } from '../services/subscriptions';
 import type { SubscriptionTemplate } from '../data/subscriptionTemplates';
 
-type View = 'overview' | 'subscriptions' | 'payments' | 'categories';
+type View = 'overview' | 'subscriptions' | 'payments' | 'categories' | 'chat';
 
 export default function DashboardPage() {
   const location = useLocation();
@@ -30,7 +31,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const hash = location.hash.replace('#', '') as View;
-    if (hash && ['overview', 'subscriptions', 'payments', 'categories'].includes(hash) && hash !== currentView) {
+    if (hash && ['overview', 'subscriptions', 'payments', 'categories', 'chat'].includes(hash) && hash !== currentView) {
       pendingView.current = hash;
       setVisible(false);
     }
@@ -271,6 +272,17 @@ export default function DashboardPage() {
               <p className="text-gray-400">Organize your subscriptions with custom categories</p>
             </div>
             <CategoryManager />
+          </div>
+        )}
+
+        {/* Chat View */}
+        {currentView === 'chat' && (
+          <div>
+            <div className="mb-6">
+              <h2 className="text-3xl font-bold text-white mb-2">AI Assistant</h2>
+              <p className="text-gray-400">Chat with Wardaya AI to manage subscriptions, read receipts, and get insights</p>
+            </div>
+            <ChatPage />
           </div>
         )}
       </div>

@@ -4,7 +4,8 @@ import { authService } from '../services/auth';
 import { subscriptionService } from '../services/subscriptions';
 import { toast } from 'sonner';
 import Layout from '../components/Layout';
-import { User, Lock, DollarSign, Save, Eye, EyeOff, Bell, Download, Upload, Database } from 'lucide-react';
+import { User, Lock, DollarSign, Save, Eye, EyeOff, Bell, Download, Upload, Database, Sun, Moon, Monitor } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
 
 export default function ProfilePage() {
   const { user, refreshUser } = useAuth();
@@ -28,6 +29,7 @@ export default function ProfilePage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [backupLoading, setBackupLoading] = useState(false);
   const [restoreLoading, setRestoreLoading] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   const inputClasses = "w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500";
   const selectClasses = "w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white";
@@ -159,6 +161,49 @@ export default function ProfilePage() {
               </button>
             </div>
           </form>
+        </div>
+
+        {/* Appearance */}
+        <div className="bg-slate-800/60 backdrop-blur rounded-2xl border border-white/10 overflow-hidden">
+          <div className="p-6 border-b border-white/10 flex items-center gap-3">
+            <div className="p-2 bg-indigo-500/20 rounded-lg">
+              <Monitor className="w-5 h-5 text-indigo-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-white">Appearance</h3>
+          </div>
+          <div className="p-6">
+            <p className="text-sm text-gray-400 mb-4">Choose your preferred theme</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => { if (theme !== 'dark') toggleTheme(); }}
+                className={`flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all ${
+                  theme === 'dark'
+                    ? 'border-purple-500 bg-purple-500/10'
+                    : 'border-slate-700 hover:border-slate-600'
+                }`}
+              >
+                <Moon className={`w-5 h-5 ${theme === 'dark' ? 'text-purple-400' : 'text-gray-500'}`} />
+                <div className="text-left">
+                  <p className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-400'}`}>Dark</p>
+                  <p className="text-xs text-gray-500">Easy on the eyes</p>
+                </div>
+              </button>
+              <button
+                onClick={() => { if (theme !== 'light') toggleTheme(); }}
+                className={`flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all ${
+                  theme === 'light'
+                    ? 'border-purple-500 bg-purple-500/10'
+                    : 'border-slate-700 hover:border-slate-600'
+                }`}
+              >
+                <Sun className={`w-5 h-5 ${theme === 'light' ? 'text-purple-400' : 'text-gray-500'}`} />
+                <div className="text-left">
+                  <p className={`text-sm font-medium ${theme === 'light' ? 'text-white' : 'text-gray-400'}`}>Light</p>
+                  <p className="text-xs text-gray-500">Classic bright look</p>
+                </div>
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Change Password - hidden for Google-only users */}
