@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import { authService } from '../services/auth';
 import type { User } from '../types';
 
@@ -42,10 +42,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
-  const refreshUser = async () => {
+  const refreshUser = useCallback(async () => {
     const profile = await authService.getProfile();
     setUser(profile);
-  };
+  }, []);
 
   return (
     <AuthContext.Provider value={{ user, loading, login, logout, refreshUser }}>
