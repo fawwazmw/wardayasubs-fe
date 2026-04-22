@@ -163,7 +163,9 @@ export default function Login() {
             <Button
               type="button"
               onClick={() => {
-                window.location.href = '/api/auth/google';
+                const apiUrl = import.meta.env.VITE_API_URL || '/api';
+                const baseUrl = apiUrl.startsWith('/') ? '' : apiUrl.replace('/api', '');
+                window.location.href = `${baseUrl}/api/auth/google`;
               }}
               className="w-full bg-white hover:bg-gray-100 text-gray-900 border border-gray-300"
             >
