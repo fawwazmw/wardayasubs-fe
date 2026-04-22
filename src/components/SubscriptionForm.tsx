@@ -68,8 +68,8 @@ export default function SubscriptionForm({ subscription, templateData, onSuccess
     try {
       const data = await categoryService.getAll();
       setCategories(data);
-    } catch (err) {
-      console.error('Failed to load categories:', err);
+    } catch {
+      // Categories are optional — form still works without them
     }
   };
 
