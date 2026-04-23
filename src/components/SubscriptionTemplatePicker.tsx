@@ -24,10 +24,10 @@ export default function SubscriptionTemplatePicker({ onSelect, onClose }: Subscr
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-slate-900 rounded-2xl border border-white/10 max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+      <div className="bg-slate-900 rounded-2xl border border-white/10 max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="p-6 border-b border-white/10">
-          <div className="flex items-center justify-between mb-4">
+        <div className="px-6 pt-5 pb-4 border-b border-white/10">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-purple-500/20 rounded-lg">
                 <Sparkles className="w-5 h-5 text-purple-400" />
@@ -60,8 +60,8 @@ export default function SubscriptionTemplatePicker({ onSelect, onClose }: Subscr
 
         {/* Category Tabs */}
         {!search && (
-          <div className="px-6 py-3 border-b border-white/10 overflow-x-auto">
-            <div className="flex gap-2">
+          <div className="px-6 py-4 border-b border-white/10 overflow-x-auto scrollbar-hide">
+            <div className="flex gap-2 flex-nowrap">
               <button
                 onClick={() => setSelectedCategory('all')}
                 className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
@@ -90,7 +90,7 @@ export default function SubscriptionTemplatePicker({ onSelect, onClose }: Subscr
         )}
 
         {/* Templates Grid */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 min-h-0 max-h-[50vh] overflow-y-auto px-6 py-4 scrollbar-hide">
           {filteredTemplates.length === 0 ? (
             <div className="text-center py-12">
               <Search className="w-12 h-12 text-gray-500 mx-auto mb-4" />
