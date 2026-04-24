@@ -6,9 +6,9 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, loading } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
-  // Wait for auth check to complete
+  // Wait for initial auth check
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -17,10 +17,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  // Token in localStorage = session exists (even if profile fetch failed due to network)
-  const hasToken = !!localStorage.getItem('token');
-
-  if (!user && !hasToken) {
+  if (!isAuthenticated) {
     return <Navigate to="/" replace />;
   }
 

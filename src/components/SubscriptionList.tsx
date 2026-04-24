@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { subscriptionService } from '../services/subscriptions';
 import { categoryService } from '../services/categories';
-import { Calendar, DollarSign, Edit2, Trash2, Tag, Search, Filter, CheckSquare, Square } from 'lucide-react';
+import { Calendar, DollarSign, Edit2, Trash2, Tag, Search, Filter, CheckSquare, Square, Users, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Category {
@@ -23,6 +23,12 @@ interface Subscription {
     name: string;
     color?: string;
   };
+  isTrial?: boolean;
+  trialEndsAt?: string;
+  isShared?: boolean;
+  totalMembers?: number;
+  userShare?: number;
+  usageRating?: number;
 }
 
 interface SubscriptionListProps {
@@ -350,6 +356,35 @@ export default function SubscriptionList({ onEdit, refreshTrigger }: Subscriptio
                 >
                   {sub.isActive ? 'Active' : 'Inactive'}
                 </button>
+              </div>
+
+              {/* Badges */}
+              <div className="flex flex-wrap gap-2 mb-3">
+                {sub.isTrial && sub.trialEndsAt && (() => {
+                  const daysLeft = Math.ceil((new Date(sub.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                  return daysLeft > 0 ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                      <Clock className="w-3 h-3" />
+                      Trial: {daysLeft} day{daysLeft !== 1 ? 's' : ''} left
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/20 text-red-400 border border-red-500/30">
+                      <Clock className="w-3 h-3" />
+                      Trial expired
+                    </span>
+                  );
+                })()}
+                {sub.isShared && sub.totalMembers && sub.totalMembers > 1 && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                    <Users className="w-3 h-3" />
+                    Shared · {sub.totalMembers} people · {formatCurrency(sub.userShare ?? sub.amount / sub.totalMembers, sub.currency)}/person
+                  </span>
+                )}
+                {sub.usageRating && sub.usageRating > 0 && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
+                    {Array.from({ length: 5 }, (_, i) => i < sub.usageRating! ? '★' : '☆').join('')}
+                  </span>
+                )}
               </div>
 
               <div className="space-y-3 mb-4">
