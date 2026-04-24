@@ -29,6 +29,11 @@ export default function SubscriptionForm({ subscription, templateData, onSuccess
     categoryId: '',
     reminderDays: '3',
     notes: '',
+    isTrial: false,
+    trialEndsAt: '',
+    isShared: false,
+    totalMembers: '1',
+    usageRating: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -47,6 +52,11 @@ export default function SubscriptionForm({ subscription, templateData, onSuccess
         categoryId: subscription.categoryId || '',
         reminderDays: subscription.reminderDays?.toString() || '3',
         notes: subscription.notes || '',
+        isTrial: subscription.isTrial || false,
+        trialEndsAt: subscription.trialEndsAt?.split('T')[0] || '',
+        isShared: subscription.isShared || false,
+        totalMembers: subscription.totalMembers?.toString() || '1',
+        usageRating: subscription.usageRating?.toString() || '',
       });
     } else if (templateData) {
       setFormData({
@@ -60,6 +70,11 @@ export default function SubscriptionForm({ subscription, templateData, onSuccess
         categoryId: '',
         reminderDays: '3',
         notes: templateData.notes || '',
+        isTrial: false,
+        trialEndsAt: '',
+        isShared: false,
+        totalMembers: '1',
+        usageRating: '',
       });
     }
   }, [subscription, templateData]);
@@ -89,6 +104,11 @@ export default function SubscriptionForm({ subscription, templateData, onSuccess
         categoryId: formData.categoryId || undefined,
         reminderDays: parseInt(formData.reminderDays),
         notes: formData.notes || undefined,
+        isTrial: formData.isTrial,
+        trialEndsAt: formData.isTrial && formData.trialEndsAt ? new Date(formData.trialEndsAt).toISOString() : undefined,
+        isShared: formData.isShared,
+        totalMembers: formData.isShared ? parseInt(formData.totalMembers) : undefined,
+        usageRating: formData.usageRating ? parseInt(formData.usageRating) : undefined,
       };
 
       if (subscription) {
@@ -110,10 +130,18 @@ export default function SubscriptionForm({ subscription, templateData, onSuccess
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const target = e.target;
+    if (target instanceof HTMLInputElement && target.type === 'checkbox') {
+      setFormData({
+        ...formData,
+        [target.name]: target.checked,
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [target.name]: target.value,
+      });
+    }
   };
 
   const inputClasses = "w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500";
@@ -272,6 +300,83 @@ export default function SubscriptionForm({ subscription, templateData, onSuccess
           className={`${inputClasses} resize-none`}
           placeholder="Additional notes..."
         />
+      </div>
+
+      {/* Free Trial */}
+      <div className="space-y-3">
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            name="isTrial"
+            checked={formData.isTrial}
+            onChange={handleChange}
+            className="w-4 h-4 rounded border-slate-600 bg-slate-800/50 text-purple-500 focus:ring-purple-500 focus:ring-offset-0"
+          />
+          <span className={labelClasses + ' mb-0'}>This is a free trial</span>
+        </label>
+        {formData.isTrial && (
+          <div>
+            <label className={labelClasses}>Trial ends on</label>
+            <input
+              type="date"
+              name="trialEndsAt"
+              value={formData.trialEndsAt}
+              onChange={handleChange}
+              className={inputClasses}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Sharing */}
+      <div className="space-y-3">
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            name="isShared"
+            checked={formData.isShared}
+            onChange={handleChange}
+            className="w-4 h-4 rounded border-slate-600 bg-slate-800/50 text-purple-500 focus:ring-purple-500 focus:ring-offset-0"
+          />
+          <span className={labelClasses + ' mb-0'}>Shared subscription</span>
+        </label>
+        {formData.isShared && (
+          <div>
+            <label className={labelClasses}>Number of people sharing</label>
+            <input
+              type="number"
+              name="totalMembers"
+              value={formData.totalMembers}
+              onChange={handleChange}
+              min="1"
+              className={inputClasses}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Usage Rating */}
+      <div>
+        <label className={labelClasses}>How often do you use this?</label>
+        <div className="flex gap-2">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              type="button"
+              onClick={() => setFormData({ ...formData, usageRating: formData.usageRating === star.toString() ? '' : star.toString() })}
+              className={`text-2xl transition-colors ${
+                parseInt(formData.usageRating) >= star
+                  ? 'text-yellow-400'
+                  : 'text-gray-600 hover:text-gray-400'
+              }`}
+            >
+              ★
+            </button>
+          ))}
+          {formData.usageRating && (
+            <span className="text-sm text-gray-400 self-center ml-2">{formData.usageRating}/5</span>
+          )}
+        </div>
       </div>
 
       <div className="flex gap-3 pt-4">

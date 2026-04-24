@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
-import { LayoutDashboard, CreditCard, FolderOpen, Receipt, LogOut, User, Menu, X, Settings, Home, Shield, MessageCircle } from 'lucide-react';
+import { LayoutDashboard, CreditCard, FolderOpen, Receipt, LogOut, User, Menu, X, Settings, Home, Shield, MessageCircle, TrendingUp } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import KeyboardShortcutsHelp from './KeyboardShortcutsHelp';
 import { useGlobalShortcuts } from '../hooks/useKeyboardShortcuts';
@@ -39,6 +39,7 @@ export default function Layout({ children }: LayoutProps) {
     { id: 'subscriptions', label: 'Subscriptions', icon: CreditCard },
     { id: 'payments', label: 'Payments', icon: Receipt },
     { id: 'categories', label: 'Categories', icon: FolderOpen },
+    { id: 'insights', label: 'Insights', icon: TrendingUp },
     { id: 'chat', label: 'AI Assistant', icon: MessageCircle },
   ];
 

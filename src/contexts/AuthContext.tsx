@@ -5,6 +5,7 @@ import type { User } from '../types';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
@@ -19,6 +20,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loadProfile = useCallback(async () => {
     const token = localStorage.getItem('token');
     if (!token) {
+      setUser(null);
       setLoading(false);
       return;
     }
@@ -28,13 +30,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(profile);
     } catch (err: any) {
       if (err.response?.status === 401) {
-        // Token is invalid/expired — clear it
+        // Token is invalid/expired — clear everything
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setUser(null);
+      } else if (!err.response) {
+        // Network error (backend down) — keep token, retry later
+        // But set user to null so UI knows we don't have user data
+        setUser(null);
+        // Retry after 5 seconds
+        setTimeout(() => {
+          loadProfile();
+        }, 5000);
       }
-      // Network error / backend down — keep token, user stays null but token preserved.
-      // ProtectedRoute will still allow access since hasToken is true.
     } finally {
       setLoading(false);
     }
@@ -60,8 +68,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(profile);
   }, []);
 
+  // isAuthenticated = has a valid user OR has a token (backend might be down)
+  const isAuthenticated = !!user || !!localStorage.getItem('token');
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, isAuthenticated, login, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

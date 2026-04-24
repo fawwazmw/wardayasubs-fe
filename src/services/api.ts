@@ -13,7 +13,7 @@ class ApiClient {
       },
     });
 
-    // Request interceptor to add auth token
+    // Request interceptor — only add token if it exists
     this.client.interceptors.request.use(
       (config) => {
         const token = localStorage.getItem('token');
@@ -25,18 +25,21 @@ class ApiClient {
       (error) => Promise.reject(error)
     );
 
-    // Response interceptor — only clear token on explicit 401 from non-auth endpoints
+    // Response interceptor — handle 401 from non-auth endpoints
     this.client.interceptors.response.use(
       (response) => response,
       (error: AxiosError) => {
-        // Only wipe session on 401 from actual API calls (not auth endpoints, not network errors)
         if (
           error.response?.status === 401 &&
           !error.config?.url?.includes('/auth/')
         ) {
+          // Token is invalid — clear session and redirect
           localStorage.removeItem('token');
           localStorage.removeItem('user');
-          window.location.href = '/login';
+          // Use replace to avoid back-button loop
+          if (window.location.pathname !== '/' && window.location.pathname !== '/login') {
+            window.location.replace('/');
+          }
         }
         return Promise.reject(error);
       }

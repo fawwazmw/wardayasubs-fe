@@ -11,11 +11,15 @@ import OnboardingTour from '../components/OnboardingTour';
 import PaymentHistory from '../components/PaymentHistory';
 import CategoryManager from '../components/CategoryManager';
 import ChatPage from '../components/ChatPage';
+import SpendingForecast from '../components/SpendingForecast';
+import BillingComparison from '../components/BillingComparison';
+import SubscriptionScore from '../components/SubscriptionScore';
+import CurrencyOverview from '../components/CurrencyOverview';
 import { Button } from '@/components/ui/button';
 import { subscriptionService } from '../services/subscriptions';
 import type { SubscriptionTemplate } from '../data/subscriptionTemplates';
 
-type View = 'overview' | 'subscriptions' | 'payments' | 'categories' | 'chat';
+type View = 'overview' | 'subscriptions' | 'payments' | 'categories' | 'insights' | 'chat';
 
 export default function DashboardPage() {
   const location = useLocation();
@@ -31,7 +35,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const hash = location.hash.replace('#', '') as View;
-    if (hash && ['overview', 'subscriptions', 'payments', 'categories', 'chat'].includes(hash) && hash !== currentView) {
+    if (hash && ['overview', 'subscriptions', 'payments', 'categories', 'insights', 'chat'].includes(hash) && hash !== currentView) {
       pendingView.current = hash;
       setVisible(false);
     }
@@ -272,6 +276,20 @@ export default function DashboardPage() {
               <p className="text-gray-400">Organize your subscriptions with custom categories</p>
             </div>
             <CategoryManager />
+          </div>
+        )}
+
+        {/* Insights View */}
+        {currentView === 'insights' && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-3xl font-bold text-white mb-2">Insights</h2>
+              <p className="text-gray-400">Spending forecasts, comparisons, and subscription value analysis</p>
+            </div>
+            <SpendingForecast />
+            <BillingComparison />
+            <SubscriptionScore />
+            <CurrencyOverview />
           </div>
         )}
 

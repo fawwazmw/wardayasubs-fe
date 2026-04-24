@@ -18,8 +18,10 @@ export default function NotificationBell({ align = 'left' }: NotificationBellPro
   const unreadCount = notifications.filter(n => !n.read).length;
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
     loadNotifications();
-    // Poll every 60 seconds
     const interval = setInterval(loadNotifications, 60000);
     return () => clearInterval(interval);
   }, []);
