@@ -1,17 +1,16 @@
 import { useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
 export default function AuthCallbackPage() {
-  const [searchParams] = useSearchParams();
   const hasProcessed = useRef(false);
 
   useEffect(() => {
     if (hasProcessed.current) return;
     hasProcessed.current = true;
 
-    const token = searchParams.get('token');
-    const error = searchParams.get('error');
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const token = hashParams.get('token');
+    const error = hashParams.get('error');
 
     if (error) {
       toast.error(
@@ -32,7 +31,7 @@ export default function AuthCallbackPage() {
       toast.error('No authentication token received');
       window.location.href = '/login';
     }
-  }, [searchParams]);
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
